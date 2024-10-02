@@ -20,7 +20,7 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
-    private final List<UserEntity> users;
+//    private final List<UserEntity> users;
 
 //    public UserService() {
 //        this.users = List.of(
@@ -30,9 +30,9 @@ public class UserService {
 //    }
 
     public Optional<UserEntity> getByLogin(@NonNull String login) {
-        return users.stream()
-                .filter(user -> login.equals(user.getLogin()))
-                .findFirst();
+        UserEntity user = userRepo.findByLogin(login);
+        return Optional.ofNullable(user);
+
     }
 
     public UserEntity registration(UserEntity user) throws UserAlreadyExistException {
