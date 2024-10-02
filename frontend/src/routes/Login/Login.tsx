@@ -13,9 +13,16 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import "./Login.scss";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setUsername, setToken } from "../../store/userSlice";
+
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -29,18 +36,37 @@ export const Login = () => {
     event.preventDefault();
   };
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setInputUsername] = useState("");
+  const [password, setInputPassword] = useState("");
 
   const [usernameErrorText, setUsernameErrorText] = useState("");
   const [passwordErrorText, setPasswordErrorText] = useState("");
 
   const handleLogin = () => {
-    console.log(username, password);
-
-    if (username.length <= 3) {
-      setUsernameErrorText("Слишком короткое имя пользователя");
-    }
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        login: username,
+        password: password,
+      }),
+    }).then((response) => {
+      switch (response.status) {
+        case 200: {
+          console.log("успешно залогинились");
+          dispatch(setUsername(username));
+          dispatch(setToken("token")); // запишем при успешном логине в стор токен и юзернейм
+          navigate("/");
+          break;
+        }
+        default: {
+          setPasswordErrorText("Неправильный пароль");
+        }
+      }
+    });
   };
 
   return (
@@ -58,14 +84,14 @@ export const Login = () => {
           helperText={usernameErrorText}
           onChange={(e) => {
             setUsernameErrorText("");
-            setUsername(e.target.value);
+            setInputUsername(e.target.value);
           }}
         />
         <FormControl variant="outlined">
           <InputLabel htmlFor="outlined-adornment-password">Пароль</InputLabel>
           <OutlinedInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setInputPassword(e.target.value)}
             id="outlined-adornment-password"
             type={showPassword ? "text" : "password"}
             endAdornment={
@@ -84,6 +110,7 @@ export const Login = () => {
             label="Пароль"
           />
         </FormControl>
+        <InputLabel error>{passwordErrorText}</InputLabel>
         <Button
           variant="outlined"
           disabled={!(password && username)}
