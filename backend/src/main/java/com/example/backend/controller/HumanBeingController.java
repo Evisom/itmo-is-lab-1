@@ -13,6 +13,16 @@ public class HumanBeingController {
     @Autowired
     private HumanBeingService humanBeingService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity getHumanBeing(@PathVariable Long id){
+        try {
+            return ResponseEntity.ok(humanBeingService.getHumanBeing(id));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Error");
+        }
+
+    }
+
     @PostMapping
     public ResponseEntity createHumanBeing(@RequestBody HumanBeingEntity human,
                                            @RequestParam Long userId){

@@ -36,6 +36,8 @@ public class HumanBeing {
         model.setMood(humanBeingEntity.getMood());
         model.setImpactSpeed(humanBeingEntity.getImpactSpeed());
         model.setWeaponType(humanBeingEntity.getWeaponType());
+        model.setSoundtrackName(humanBeingEntity.getSoundtrackName());
+        model.setMinutesOfWaiting(humanBeingEntity.getMinutesOfWaiting());
         return model;
     }
 

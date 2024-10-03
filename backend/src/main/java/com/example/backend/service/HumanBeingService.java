@@ -29,6 +29,11 @@ public class HumanBeingService {
     @Autowired
     private CoordinatesRepo coordinatesRepo;
 
+    public HumanBeing getHumanBeing(Long id){
+        HumanBeingEntity humanBeing = humanBeingRepo.findById(id).get();
+        return HumanBeing.toModel(humanBeing);
+    }
+
     public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
         UserEntity user = userRepo.findById(userId).get();
         Coordinates coordinates = new Coordinates();
