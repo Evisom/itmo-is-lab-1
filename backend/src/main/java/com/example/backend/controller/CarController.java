@@ -2,15 +2,13 @@ package com.example.backend.controller;
 
 import com.example.backend.domain.HumanBeing;
 import com.example.backend.entity.Car;
+import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.exception.NoEntityException;
 import com.example.backend.exception.UserNotFoundException;
 import com.example.backend.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,6 +31,15 @@ public class CarController {
             return ResponseEntity.ok(carService.getOne(id).orElseThrow(() ->new NoEntityException("No such car")));
         }catch (Exception e){
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Car> createCar(@RequestBody Car car){
+        try {
+            return ResponseEntity.ok(carService.createCar(car));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
         }
     }
 }
