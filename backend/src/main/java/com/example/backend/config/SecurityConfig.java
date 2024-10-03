@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/login", "/api/auth/token","/users/**","cars/**","/humanbeings/*","/humanbeings/**","/hello","/swagger-ui/**","/v3/**").permitAll()
+                        .requestMatchers("/api/auth/login","/api/auth/registration", "/api/auth/token","/users/**","cars/**","/humanbeings/*","/humanbeings/**","/hello","/swagger-ui/**","/v3/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(httpBasic -> httpBasic.disable())

@@ -15,17 +15,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public ResponseEntity registration(@RequestBody UserEntity user){
-        try {
-            userService.registration(user);
-            return ResponseEntity.ok("Сервер работате");
-        }catch (UserAlreadyExistException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("Произошла ошибка");
-        }
-    }
+
 
 
     @GetMapping("/id")
