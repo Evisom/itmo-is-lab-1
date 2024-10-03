@@ -12,7 +12,9 @@ import com.example.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,6 +35,9 @@ public class HumanBeingService {
     public HumanBeing getHumanBeing(Long id){
         HumanBeingEntity humanBeing = humanBeingRepo.findById(id).get();
         return HumanBeing.toModel(humanBeing);
+    }
+    public List<HumanBeing> getAllHumanBeing() {
+        return humanBeingRepo.findAll().stream().map(HumanBeing::toModel).collect(Collectors.toList());
     }
 
     public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
@@ -73,5 +78,6 @@ public class HumanBeingService {
 
         return HumanBeing.toModel(humanBeingEntity);
     }
+
 
 }

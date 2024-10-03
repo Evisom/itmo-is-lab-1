@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -23,6 +24,13 @@ public class HumanBeingController {
         }catch (Exception e){
             return ResponseEntity.badRequest().body("Error");
         }
+
+    }
+    @GetMapping
+    public ResponseEntity<List<HumanBeing>> getHumanBeing(){
+
+            return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
+
 
     }
 
