@@ -47,4 +47,7 @@ public class UserService {
         return  id;
     }
 
+    public void save(UserEntity newUser) {
+        userRepo.save(newUser);
+    }
 }
