@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "user_entity")
 @Entity
 public class UserEntity {
     @Id

@@ -7,8 +7,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import lombok.Setter;
 
 
@@ -16,10 +14,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
+@Table(name = "human_being")
 public class HumanBeingEntity {
-
 
 
     @Id
@@ -30,9 +27,10 @@ public class HumanBeingEntity {
     @NotBlank
     private String name;
 
-//    @NotNull
-//    @Embedded
-//    private Coordinates coordinates;
+    @NotNull
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "coordinates_id")
+    private Coordinates coordinates;
 
     @NotNull
     @Column(updatable = false)
@@ -43,9 +41,10 @@ public class HumanBeingEntity {
 
     private boolean hasToothpick;
 
-//    @NotNull
-//    @Embedded
-//    private Car car;
+    @NotNull
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "car_id")
+    private Car car;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -55,7 +54,6 @@ public class HumanBeingEntity {
     private double impactSpeed;
 
     @NotNull
-    @NotBlank
     private String soundtrackName;
 
     @NotNull
@@ -66,6 +64,16 @@ public class HumanBeingEntity {
 
 
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     private UserEntity user;
+
+    public HumanBeingEntity() {
+        this.creationDate = LocalDateTime.now();
+    }
+
+    public boolean getHasToothpick() {
+        return hasToothpick;
+    }
+
+
 }
