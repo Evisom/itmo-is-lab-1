@@ -1,13 +1,16 @@
 package com.example.backend.controller;
 
+import com.example.backend.domain.HumanBeing;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.service.HumanBeingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/humanbeing")
+@RequestMapping("/humanbeings")
 public class HumanBeingController {
 
     @Autowired
@@ -34,14 +37,13 @@ public class HumanBeingController {
 
     }
 
-    @PutMapping
-    public ResponseEntity updateHumanBeing(  @RequestParam Long humanId){
+    @PutMapping("/{id}")
+    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity) {
         try {
-            return ResponseEntity.ok(humanBeingService.updateHumanBeing( humanId));
-
+            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
         }catch (Exception e){
-                return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.notFound().build();
         }
-
     }
+
 }
