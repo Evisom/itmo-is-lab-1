@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/login", "/api/auth/token","/users","/users/*","/humanbeing","/hello").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/token","/users","/users/*","/humanbeing","/hello","/swagger-ui/*","/v3/api-docs/swagger-config","/v3/api-docs").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(httpBasic -> httpBasic.disable())

@@ -1,11 +1,14 @@
 package com.example.backend.service;
 
-import com.example.backend.entity.HumanBeing;
+import com.example.backend.domain.HumanBeing;
+import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.HumanBeingRepo;
 import com.example.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
 
 @Service
 public class HumanBeingService {
@@ -16,16 +19,17 @@ public class HumanBeingService {
     @Autowired
     private UserRepo userRepo;
 
-    public HumanBeing createHumanBeing(HumanBeing human, Long userId){
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
         UserEntity user = userRepo.findById(userId).get();
         human.setUser(user);
-        return humanBeingRepo.save(human);
+        System.out.println(user);
+        return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
     public HumanBeing updateHumanBeing(Long id){
-        HumanBeing human = humanBeingRepo.findById(id).get();
+        HumanBeingEntity human = humanBeingRepo.findById(id).get();
         human.setRealHero(!human.getRealHero());
-        return humanBeingRepo.save(human);
+        return HumanBeing.toModel(humanBeingRepo.save(human));
 
     }
 }
