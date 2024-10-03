@@ -28,7 +28,6 @@ public class HumanBeingController {
     }
     @GetMapping
     public ResponseEntity<List<HumanBeing>> getHumanBeing(){
-
             return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
 
 
@@ -50,6 +49,14 @@ public class HumanBeingController {
         try {
             return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
         }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id) {
+        if (humanBeingService.deleteHumanBeing(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
             return ResponseEntity.notFound().build();
         }
     }

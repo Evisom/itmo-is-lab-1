@@ -80,4 +80,11 @@ public class HumanBeingService {
     }
 
 
+    public boolean deleteHumanBeing(Long id) {
+        if (humanBeingRepo.existsById(id)) {
+            humanBeingRepo.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
