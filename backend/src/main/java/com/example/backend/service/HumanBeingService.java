@@ -42,6 +42,7 @@ public class HumanBeingService {
 
     public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
         UserEntity user = userRepo.findById(userId).get();
+
         Coordinates coordinates = new Coordinates();
         coordinates.setX(human.getCoordinates().getX());
         coordinates.setY(human.getCoordinates().getY());
@@ -60,8 +61,6 @@ public class HumanBeingService {
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
 
-
-
         humanBeingEntity.setName(humanBeingDetails.getName());
         humanBeingEntity.setCoordinates(humanBeingDetails.getCoordinates());
         humanBeingEntity.setRealHero(humanBeingDetails.getRealHero());
@@ -72,7 +71,6 @@ public class HumanBeingService {
         humanBeingEntity.setSoundtrackName(humanBeingDetails.getSoundtrackName());
         humanBeingEntity.setMinutesOfWaiting(humanBeingDetails.getMinutesOfWaiting());
         humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
-
 
         humanBeingRepo.save(humanBeingEntity);
 

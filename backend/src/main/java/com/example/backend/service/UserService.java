@@ -20,14 +20,6 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
-//    private final List<UserEntity> users;
-
-//    public UserService() {
-//        this.users = List.of(
-//                new UserEntity(1L,"anton", "1234"),
-//                new UserEntity(2L,"ivan", "12345")
-//        );
-//    }
 
     public Optional<UserEntity> getByLogin(@NonNull String login) {
         UserEntity user = userRepo.findByLogin(login);

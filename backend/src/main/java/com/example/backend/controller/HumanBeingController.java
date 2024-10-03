@@ -27,7 +27,7 @@ public class HumanBeingController {
 
     }
     @GetMapping
-    public ResponseEntity<List<HumanBeing>> getHumanBeing(){
+    public ResponseEntity<List<HumanBeing>> getAllHumanBeing(){
             return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
 
 
