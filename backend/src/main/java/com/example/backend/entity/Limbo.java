@@ -17,6 +17,7 @@ public class Limbo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    private Long userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

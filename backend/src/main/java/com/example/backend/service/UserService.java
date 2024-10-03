@@ -1,9 +1,11 @@
 package com.example.backend.service;
 
+import com.example.backend.domain.Role;
 import com.example.backend.domain.User;
+import com.example.backend.entity.Limbo;
 import com.example.backend.entity.UserEntity;
-import com.example.backend.exception.UserAlreadyExistException;
 import com.example.backend.exception.UserNotFoundException;
+import com.example.backend.repository.LimboRepo;
 import com.example.backend.repository.UserRepo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,9 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private LimboRepo limboRepo;
+
 
     public Optional<UserEntity> getByLogin(@NonNull String login) {
         UserEntity user = userRepo.findByLogin(login);
@@ -27,12 +32,7 @@ public class UserService {
 
     }
 
-    public UserEntity registration(UserEntity user) throws UserAlreadyExistException {
-        if (userRepo.findByLogin(user.getLogin())!= null){
-            throw  new UserAlreadyExistException("User alredy exist");
-        }
-        return userRepo.save(user);
-    }
+
 
     public User getOne(Long id) throws UserNotFoundException {
         UserEntity user = userRepo.findById(id).get();
@@ -50,4 +50,21 @@ public class UserService {
     public void save(UserEntity newUser) {
         userRepo.save(newUser);
     }
+
+    public boolean isAnyAdmin(){
+        List<UserEntity> adminList = userRepo.findAll();
+        for (UserEntity user : adminList){
+            if (user.getRoles().contains(Role.ADMIN)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void goToLimbo(UserEntity user) {
+        Limbo limboEntity = new Limbo(); // Assuming you have a Limbo class
+        limboEntity.setUser(user); // Set user or any other fields as needed
+        limboRepo.save(limboEntity);
+    }
+
 }

@@ -20,6 +20,9 @@ public class UserEntity {
     private String password;
     private Set<Role> roles;
 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    private Limbo limbo;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",orphanRemoval = true)
     private List<HumanBeingEntity> humanBeingEntityList;
 }

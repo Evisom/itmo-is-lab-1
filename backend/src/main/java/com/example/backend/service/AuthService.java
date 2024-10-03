@@ -6,6 +6,7 @@ import com.example.backend.domain.JwtResponse;
 import com.example.backend.domain.Role;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.exception.AuthException;
+import com.example.backend.exception.UserAlreadyExistException;
 import com.example.backend.util.PasswordHash384;
 import io.jsonwebtoken.Claims;
 import lombok.NonNull;
@@ -26,10 +27,10 @@ public class AuthService {
     private final Map<String, String> refreshStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
 
-    public JwtResponse register(@NonNull JwtRequest authRequest) {
+    public JwtResponse register(@NonNull JwtRequest authRequest, Boolean wantBeAdmin) throws  UserAlreadyExistException {
 
         if (userService.getByLogin(authRequest.getLogin()).isPresent()) {
-            throw new AuthException("Пользователь с таким логином уже существует");
+            throw new UserAlreadyExistException("Пользователь с таким логином уже существует");
         }
 
 
@@ -44,9 +45,16 @@ public class AuthService {
         Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
         newUser.setRoles(roles);
-
-
         userService.save(newUser);
+        if (! userService.isAnyAdmin() && wantBeAdmin){
+            roles.add(Role.ADMIN);
+            userService.save(newUser);
+        } else if (wantBeAdmin) {
+            userService.goToLimbo(newUser);
+        }
+
+
+
 
 
         final String accessToken = jwtProvider.generateAccessToken(newUser);
