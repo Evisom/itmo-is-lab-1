@@ -42,4 +42,13 @@ public class CarController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Car> updateHumanBeing(@PathVariable Long id, @RequestBody Car car) {
+        try {
+            return ResponseEntity.ok(carService.updateCar(id, car));
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

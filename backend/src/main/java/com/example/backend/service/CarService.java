@@ -29,4 +29,13 @@ public class CarService {
     public Car createCar(Car car){
         return carRepo.save(car);
     }
+
+    public Car updateCar(Long id, Car car) {
+        Car oldCar = carRepo.findById(id).get();
+        oldCar.setCool(car.getCool());
+        carRepo.save(oldCar);
+        car.setId(id);
+        return car;
+
+    }
 }
