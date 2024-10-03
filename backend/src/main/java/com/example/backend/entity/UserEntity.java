@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "user_entity")
 @Entity
 public class UserEntity {
     @Id
@@ -18,6 +19,6 @@ public class UserEntity {
     private String password;
 //    private Set<Role> roles;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private List<HumanBeing> humanBeingList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",orphanRemoval = true)
+    private List<HumanBeingEntity> humanBeingEntityList;
 }
