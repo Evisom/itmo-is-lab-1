@@ -12,6 +12,9 @@ import com.example.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,6 +36,9 @@ public class HumanBeingService {
         HumanBeingEntity humanBeing = humanBeingRepo.findById(id).get();
         return HumanBeing.toModel(humanBeing);
     }
+    public List<HumanBeing> getAllHumanBeing() {
+        return humanBeingRepo.findAll().stream().map(HumanBeing::toModel).collect(Collectors.toList());
+    }
 
     public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
         UserEntity user = userRepo.findById(userId).get();
@@ -51,10 +57,34 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
-    public HumanBeing updateHumanBeing(Long id){
-        HumanBeingEntity human = humanBeingRepo.findById(id).get();
-        human.setRealHero(!human.getRealHero());
-        return HumanBeing.toModel(humanBeingRepo.save(human));
+    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
+        HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
 
+
+
+        humanBeingEntity.setName(humanBeingDetails.getName());
+        humanBeingEntity.setCoordinates(humanBeingDetails.getCoordinates());
+        humanBeingEntity.setRealHero(humanBeingDetails.getRealHero());
+        humanBeingEntity.setHasToothpick(humanBeingDetails.getHasToothpick());
+        humanBeingEntity.setCar(humanBeingDetails.getCar());
+        humanBeingEntity.setMood(humanBeingDetails.getMood());
+        humanBeingEntity.setImpactSpeed(humanBeingDetails.getImpactSpeed());
+        humanBeingEntity.setSoundtrackName(humanBeingDetails.getSoundtrackName());
+        humanBeingEntity.setMinutesOfWaiting(humanBeingDetails.getMinutesOfWaiting());
+        humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
+
+
+        humanBeingRepo.save(humanBeingEntity);
+
+        return HumanBeing.toModel(humanBeingEntity);
+    }
+
+
+    public boolean deleteHumanBeing(Long id) {
+        if (humanBeingRepo.existsById(id)) {
+            humanBeingRepo.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
