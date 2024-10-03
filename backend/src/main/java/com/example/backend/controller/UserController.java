@@ -28,8 +28,8 @@ public class UserController {
     }
 
 
-    @GetMapping()
-    public ResponseEntity getOneUser(@RequestParam Long id ){
+    @GetMapping("/id")
+    public ResponseEntity getOneUser(@PathVariable Long id ){
         try {
             return ResponseEntity.ok(userService.getOne(id));
         }catch (UserNotFoundException e){

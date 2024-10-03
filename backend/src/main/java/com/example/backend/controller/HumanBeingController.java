@@ -27,19 +27,19 @@ public class HumanBeingController {
 
     }
     @GetMapping
-    public ResponseEntity<List<HumanBeing>> getHumanBeing(){
+    public ResponseEntity<List<HumanBeing>> getAllHumanBeing(){
             return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
 
 
     }
 
     @PostMapping
-    public ResponseEntity createHumanBeing(@RequestBody HumanBeingEntity human,
+    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,
                                            @RequestParam Long userId){
         try {
             return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId));
         }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.badRequest().build();
         }
 
     }
