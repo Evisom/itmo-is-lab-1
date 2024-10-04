@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
               color: "white",
               textDecoration: "none",
               opacity: isAdmin ? 1 : 0,
-              transition: "opacity 0.5s",
+              transition: "opacity 0.1s",
             }}
             component={"a"}
             href="/admin"

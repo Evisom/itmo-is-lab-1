@@ -41,7 +41,7 @@ export const ObjectPage = ({ type }) => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [editMode, setEditMode] = useState(type !== "view");
 
   const [humanBeing, setHumanBeing] = useState({

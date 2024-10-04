@@ -52,7 +52,7 @@ export const Operations = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [limboList, setLimboList] = useState();
 
   const fetchAdminStatus = () => {

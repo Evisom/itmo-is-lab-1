@@ -35,7 +35,7 @@ const App = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [paginationModel, setPaginationModel] = useState({
@@ -51,6 +51,7 @@ const App = () => {
       .then((response) => response.json())
       .then((response) => {
         setIsAdmin(response.roles.includes("ADMIN"));
+        localStorage.setItem("isAdmin", response.roles.includes("ADMIN") + "");
       })
       .catch(() => {
         console.log("Ошибка проверки админа");

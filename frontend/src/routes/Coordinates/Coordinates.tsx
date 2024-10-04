@@ -35,7 +35,7 @@ export const Coordinates = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [coordinates, setCoordinates] = useState([]);
   const [x, setX] = useState("");
   const [y, setY] = useState("");

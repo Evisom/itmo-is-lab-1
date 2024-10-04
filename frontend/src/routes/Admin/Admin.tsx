@@ -30,7 +30,7 @@ export const Admin = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [limboList, setLimboList] = useState([]);
 
   // Fetch admin status and limbo list every 2 seconds

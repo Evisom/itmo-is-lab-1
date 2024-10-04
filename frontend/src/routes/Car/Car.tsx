@@ -37,7 +37,7 @@ export const Car = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [cars, setCars] = useState([]);
   const [cool, setCool] = useState(false);
   const [editData, setEditData] = useState(null); // State for edit mode
