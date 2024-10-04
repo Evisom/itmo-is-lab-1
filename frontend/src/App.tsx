@@ -1,22 +1,30 @@
-import React, { useEffect } from "react";
+// @ts-nocheck
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "./store/store"; // Import the RootState type
-import { setUsername, setToken } from "./store/userSlice"; // Import your actions
+import { RootState } from "./store/store";
+import { setUsername, setToken } from "./store/userSlice";
 import "./App.scss";
-import { redirect, useNavigate } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { useNavigate } from "react-router-dom";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   AppBar,
   Button,
+  Checkbox,
   Container,
   Icon,
   Menu,
   MenuItem,
+  Paper,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
+import { Header } from "./components/Header";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -26,6 +34,34 @@ const App = () => {
   const token = useSelector((state: RootState) => state.user.token);
 
   const isAdmin = true;
+
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 5,
+  });
+
+  const fetchData = useCallback(() => {
+    fetch("/humanbeings")
+      .then((response) => response.json())
+      .then((response) => {
+        setTableData((prevData) => {
+          if (JSON.stringify(prevData) !== JSON.stringify(response)) {
+            return response;
+          }
+          return prevData; // No change
+        });
+      })
+      .catch(() => {
+        console.log("Ошибка загрузки таблицы");
+      });
+  }, []);
+  fetchData();
+  useEffect(() => {
+    const interval = setInterval(fetchData, 3000); // Update every 3 seconds
+    return () => clearInterval(interval); // Clear interval on component unmount
+  }, [fetchData]);
 
   useEffect(() => {
     const lsToken = localStorage.getItem("token");
@@ -39,49 +75,88 @@ const App = () => {
     }
   }, [token, navigate]);
 
-  fetch("/hello", {
-    mode: "cors",
-    method: "GET",
-    headers: {
-      Accept: "application/json",
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value.toLowerCase());
+  };
+
+  const filteredData = tableData.filter((row) => {
+    return Object.values(row)
+      .flatMap((val) => (typeof val === "object" ? Object.values(val) : val))
+      .some((field) => field.toString().toLowerCase().includes(searchQuery));
+  });
+
+  const columns: GridColDef[] = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "name", headerName: "Имя", width: 150 },
+    {
+      field: "coordinates",
+      headerName: "Координаты",
+      renderCell: (params) =>
+        `X: ${params.row.coordinates.x}, Y: ${params.row.coordinates.y}`,
+      width: 180,
     },
-  })
-    .then((response) => response.text())
-    .then((data) => console.log(data));
+    { field: "creationDate", headerName: "Дата создания", width: 180 },
+    {
+      field: "realHero",
+      headerName: "Real hero?",
+      renderCell: (params) =>
+        params.row.realHero ? <CheckIcon /> : <ClearIcon />,
+      width: 120,
+    },
+    {
+      field: "hasToothpick",
+      headerName: "Зубочистка",
+      renderCell: (params) =>
+        params.row.hasToothpick ? <CheckIcon /> : <ClearIcon />,
+      width: 120,
+    },
+    {
+      field: "car",
+      headerName: "Машина",
+      renderCell: (params) =>
+        `id: ${params.row.car.id}, ${
+          params.row.car.cool ? "cool" : "not cool"
+        }`,
+      width: 180,
+    },
+    { field: "mood", headerName: "Настроение", width: 120 },
+    { field: "impactSpeed", headerName: "Скорость", width: 150 },
+    { field: "soundtrackName", headerName: "Саундтрек", width: 180 },
+    { field: "minutesOfWaiting", headerName: "Минуты ожидания", width: 150 },
+    { field: "weaponType", headerName: "Оружие", width: 150 },
+  ];
 
   return (
     <div className="App">
-      <AppBar>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            IS-LAB-1
-          </Typography>
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              alignItems: "center",
-            }}
-          >
-            <Button color="inherit" variant="outlined">
-              Создать
-              <AddIcon />
-            </Button>
-            {isAdmin && <Button color="inherit">админка</Button>}
-            <div style={{ display: "flex", gap: 8 }}>
-              <AccountCircleIcon />
-              <Typography>{username}</Typography>
-            </div>
-            <LogoutIcon
-              onClick={() => {
-                localStorage.clear();
-                dispatch(setToken(""));
-              }}
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
-      hello, {username}, token: {token}
+      <Header
+        isAdmin={isAdmin}
+        username={username}
+        onLogout={() => {
+          localStorage.clear();
+          dispatch(setToken(""));
+          navigate("/");
+        }}
+      />
+      <Container>
+        <TextField
+          label="Поиск"
+          variant="outlined"
+          onChange={handleSearch}
+          style={{ marginBottom: 20 }}
+        />
+        <div style={{ height: 400, width: "100%" }}>
+          <DataGrid
+            rows={filteredData}
+            columns={columns}
+            pagination
+            pageSizeOptions={[5, 10, 20]}
+            rowCount={filteredData.length}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            getRowId={(row) => row.id}
+          />
+        </div>
+      </Container>
     </div>
   );
 };
