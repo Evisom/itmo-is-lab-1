@@ -8,10 +8,10 @@ import { useNavigate } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Button,
-  Checkbox,
   Container,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { Header } from "./components/Header";
 import CheckIcon from "@mui/icons-material/Check";
@@ -35,7 +35,7 @@ const App = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [paginationModel, setPaginationModel] = useState({
@@ -43,6 +43,7 @@ const App = () => {
     pageSize: 5,
   });
 
+  // Функция для получения статуса админа
   const fetchAdminStatus = useCallback(() => {
     fetch(`/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -50,38 +51,38 @@ const App = () => {
       .then((response) => response.json())
       .then((response) => {
         setIsAdmin(response.roles.includes("ADMIN"));
+        localStorage.setItem("isAdmin", response.roles.includes("ADMIN") + "");
       })
       .catch(() => {
         console.log("Ошибка проверки админа");
       });
   }, [id, token]);
 
+  // Функция для получения данных с сервера
   const fetchData = useCallback(() => {
-    fetch("/humanbeings", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/humanbeings", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((response) => response.json())
       .then((response) => {
-        if (Array.isArray(response)) {
-          setTableData(response);
-        } else {
-          setTableData([]); // Если данные не массив, устанавливаем пустой массив
-        }
+        setTableData(Array.isArray(response) ? response : []);
       })
       .catch(() => {
         console.log("Ошибка загрузки таблицы");
       });
   }, [token]);
 
-  // Правильное использование fetchAdminStatus
   useEffect(() => {
+    // Один раз при монтировании проверяем статус админа
     fetchAdminStatus();
-  }, [fetchAdminStatus]);
 
-  // Вызов fetchData только при монтировании компонента и каждые 3 секунды
-  useEffect(() => {
+    // Начальное получение данных
     fetchData();
-    const interval = setInterval(fetchData, 3000); // Обновление каждые 3 секунды
-    return () => clearInterval(interval); // Очистка интервала при размонтировании
-  }, [fetchData]);
+
+    // Устанавливаем интервал для обновления данных каждые 2 секунды
+    const interval = setInterval(fetchData, 2000);
+    return () => clearInterval(interval); // Очищаем интервал при размонтировании компонента
+  }, [fetchAdminStatus, fetchData]);
 
   useEffect(() => {
     const lsToken = localStorage.getItem("token");
@@ -90,8 +91,8 @@ const App = () => {
       navigate("/login");
     }
     if (lsToken && !token) {
-      dispatch(setToken(lsToken + ""));
-      dispatch(setUsername(lsUsername + ""));
+      dispatch(setToken(lsToken));
+      dispatch(setUsername(lsUsername));
     }
   }, [token, navigate, dispatch]);
 
@@ -103,11 +104,18 @@ const App = () => {
     fetch(`/humanbeings/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
-    }).then(() => {
-      fetchData(); // Перезагружаем данные после удаления
+    }).then((response) => {
+      if (response.status === 204) {
+        fetchData(); // Обновляем данные после удаления
+      } else {
+        alert(
+          "Объект не может быть удален так как с ним связаны другие объекты"
+        );
+      }
     });
   };
 
+  // Фильтрация данных
   const filteredData =
     tableData?.filter((row) => {
       return Object.values(row)
@@ -115,6 +123,7 @@ const App = () => {
         .some((field) => field.toString().toLowerCase().includes(searchQuery));
     }) || [];
 
+  // Определение колонок для таблицы
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -124,17 +133,17 @@ const App = () => {
           {params.row.id}
         </a>
       ),
-      width: 90,
+      flex: 1,
     },
-    { field: "name", headerName: "Имя", width: 150 },
+    { field: "name", headerName: "Имя", flex: 3 },
     {
       field: "coordinates",
       headerName: "Координаты",
       renderCell: (params) =>
         `id: ${params.row.coordinates.id} X: ${params.row.coordinates.x}, Y: ${params.row.coordinates.y}`,
-      width: 180,
+      flex: 3,
     },
-    { field: "creationDate", headerName: "Дата создания", width: 180 },
+    { field: "creationDate", headerName: "Дата создания", flex: 3 },
     {
       field: "realHero",
       headerName: "Real hero?",
@@ -150,7 +159,7 @@ const App = () => {
           {params.row.realHero ? <CheckIcon /> : <ClearIcon />}
         </div>
       ),
-      width: 120,
+      flex: 1,
     },
     {
       field: "hasToothpick",
@@ -167,8 +176,7 @@ const App = () => {
           {params.row.hasToothpick ? <CheckIcon /> : <ClearIcon />}
         </div>
       ),
-
-      width: 120,
+      flex: 1,
     },
     {
       field: "car",
@@ -177,46 +185,38 @@ const App = () => {
         `id: ${params.row.car.id}, ${
           params.row.car.cool ? "cool" : "not cool"
         }`,
-      width: 180,
+      flex: 2,
     },
-    { field: "mood", headerName: "Настроение", width: 120 },
-    { field: "impactSpeed", headerName: "Скорость", width: 150 },
-    { field: "soundtrackName", headerName: "Саундтрек", width: 180 },
-    { field: "minutesOfWaiting", headerName: "Минуты ожидания", width: 150 },
-    { field: "weaponType", headerName: "Оружие", width: 150 },
+    { field: "mood", headerName: "Настроение", flex: 2 },
+    { field: "impactSpeed", headerName: "Скорость", flex: 1 },
+    { field: "soundtrackName", headerName: "Саундтрек", flex: 2 },
+    { field: "minutesOfWaiting", headerName: "Минуты ожидания", flex: 1 },
+    { field: "weaponType", headerName: "Оружие", flex: 2 },
     {
       field: "actions",
       headerName: "Действия",
-      width: 150,
-      renderCell: (params) => {
-        return (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-around",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            {Number(params.row.userId) === id || isAdmin ? (
-              <>
-                <DeleteIcon
-                  onClick={() => {
-                    handleDeleteHuman(params.row.id);
-                  }}
-                />
-                <EditIcon
-                  onClick={() => {
-                    navigate(`/edit/${params.row.id}`);
-                  }}
-                />
-              </>
-            ) : (
-              ""
-            )}
-          </div>
-        );
-      },
+      flex: 2,
+      renderCell: (params) => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          {Number(params.row.userId) === id || isAdmin ? (
+            <>
+              <IconButton onClick={() => handleDeleteHuman(params.row.id)}>
+                <DeleteIcon />
+              </IconButton>
+              <IconButton onClick={() => navigate(`/edit/${params.row.id}`)}>
+                <EditIcon />
+              </IconButton>
+            </>
+          ) : null}
+        </div>
+      ),
     },
   ];
 
@@ -231,7 +231,7 @@ const App = () => {
           navigate("/");
         }}
       />
-      <Container style={{ marginTop: 24 }}>
+      <Container maxWidth="xxl" style={{ marginTop: 24 }}>
         <TextField
           label="Поиск"
           variant="outlined"

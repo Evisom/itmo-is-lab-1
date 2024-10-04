@@ -1,10 +1,9 @@
 // @ts-nocheck
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./../../store/store";
 import { setUsername, setToken } from "./../../store/userSlice";
 import { useNavigate, useParams } from "react-router-dom";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Button,
   Checkbox,
@@ -42,8 +41,8 @@ export const ObjectPage = ({ type }) => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [editMode, setEditMode] = useState(false || type !== "view");
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
+  const [editMode, setEditMode] = useState(type !== "view");
 
   const [humanBeing, setHumanBeing] = useState({
     name: "",
@@ -62,19 +61,23 @@ export const ObjectPage = ({ type }) => {
     weaponType: "SHOTGUN",
   });
 
-  const fetchAdminStatus = () => {
-    fetch(`/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setIsAdmin(response.roles.includes("ADMIN"));
+  // Функция для загрузки статуса администратора
+  useEffect(() => {
+    const fetchAdminStatus = () => {
+      fetch(`/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      .catch(() => {
-        console.log("ошибка проверки админа");
-      });
-  };
-  fetchAdminStatus();
+        .then((response) => response.json())
+        .then((response) => {
+          setIsAdmin(response.roles.includes("ADMIN"));
+        })
+        .catch(() => {
+          console.log("Ошибка проверки админа");
+        });
+    };
+
+    fetchAdminStatus();
+  }, [id, token]);
 
   // Функция для загрузки данных объекта с сервера
   useEffect(() => {
@@ -107,7 +110,7 @@ export const ObjectPage = ({ type }) => {
     }
   }, [objectId, token, type]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setHumanBeing((prev) => ({
       ...prev,
@@ -118,20 +121,19 @@ export const ObjectPage = ({ type }) => {
           ? Number(value) // Приведение к числу для ID и числовых полей
           : value,
     }));
-  };
+  }, []);
 
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = useCallback((e) => {
     const { name, checked } = e.target;
     setHumanBeing((prev) => ({ ...prev, [name]: checked }));
-  };
+  }, []);
 
-  const handleOptionChange = (e, field) => {
+  const handleOptionChange = useCallback((e, field) => {
     const { value } = e.target;
     setHumanBeing((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  // Для обновления координат (вложенного объекта)
-  const handleCoordinatesChange = (e) => {
+  const handleCoordinatesChange = useCallback((e) => {
     const { name, value } = e.target;
     const numValue = Number(value);
     if (name === "y" && numValue < -927) return; // Ограничение для Y
@@ -142,10 +144,9 @@ export const ObjectPage = ({ type }) => {
         [name]: numValue, // Приведение к числу для координат x и y
       },
     }));
-  };
+  }, []);
 
-  // Для обновления состояния чекбокса "cool" для автомобиля
-  const handleCarCoolChange = (e) => {
+  const handleCarCoolChange = useCallback((e) => {
     const { checked } = e.target;
     setHumanBeing((prev) => ({
       ...prev,
@@ -154,15 +155,16 @@ export const ObjectPage = ({ type }) => {
         cool: checked,
       },
     }));
-  };
+  }, []);
 
   const handleCreate = (e) => {
     e.preventDefault();
-    // Полная проверка заполненности формы
     if (
       !humanBeing.name ||
-      !humanBeing.coordinates.x ||
-      !humanBeing.coordinates.y ||
+      !(
+        (humanBeing.coordinates.x && humanBeing.coordinates.y) ||
+        humanBeing.coordinatesId
+      ) ||
       !humanBeing.minutesOfWaiting ||
       !humanBeing.soundtrackName ||
       humanBeing.impactSpeed > 154
@@ -170,45 +172,32 @@ export const ObjectPage = ({ type }) => {
       alert("Пожалуйста, заполните все поля правильно");
       return;
     }
-    const bodyObject = humanBeing;
+
+    const bodyObject = { ...humanBeing };
     if (humanBeing.carId) {
       bodyObject.car.id = humanBeing.carId;
     }
     if (humanBeing.coordinatesId) {
       bodyObject.coordinates.id = humanBeing.coordinatesId;
     }
-    if (type === "new") {
-      fetch(`/humanbeings?userId=${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bodyObject),
-      }).then((response) => {
-        if (response.status === 200) {
-          console.log("добавлен");
-          navigate("/");
-        }
-      });
-    } else {
-      fetch(`/humanbeings/${objectId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bodyObject),
-      }).then((response) => {
-        if (response.status === 200) {
-          console.log("обновлен");
-          console.log(bodyObject);
-          navigate("/");
-        }
-      });
-    }
+
+    const method = type === "new" ? "POST" : "PUT";
+    const url =
+      type === "new" ? `/humanbeings?userId=${id}` : `/humanbeings/${objectId}`;
+
+    fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyObject),
+    }).then((response) => {
+      if (response.status === 200) {
+        navigate("/");
+      }
+    });
   };
 
   return (
@@ -243,9 +232,17 @@ export const ObjectPage = ({ type }) => {
                   fetch(`/humanbeings/${objectId}`, {
                     method: "DELETE",
                     headers: { Authorization: `Bearer ${token}` },
-                  }).then(() => {
-                    navigate("/");
-                  });
+                  })
+                    .then((response) => {
+                      if (response.status !== 204) {
+                        alert(
+                          "Объект не может быть удален так как с ним связаны другие объекты"
+                        );
+                      }
+                    })
+                    .then(() => {
+                      navigate("/");
+                    });
                 }}
               >
                 удалить
@@ -415,6 +412,31 @@ export const ObjectPage = ({ type }) => {
                     ))}
                   </Select>
                 </FormControl>
+
+                {/* Чекбоксы Real Hero и Toothpick */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={humanBeing.realHero}
+                      onChange={handleCheckboxChange}
+                      name="realHero"
+                      disabled={!editMode}
+                    />
+                  }
+                  label="Real Hero"
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={humanBeing.hasToothpick}
+                      onChange={handleCheckboxChange}
+                      name="hasToothpick"
+                      disabled={!editMode}
+                    />
+                  }
+                  label="Есть зубочистка"
+                />
 
                 {type === "new" && (
                   <Button variant="outlined" color="primary" type="submit">

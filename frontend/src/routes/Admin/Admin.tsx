@@ -3,23 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./../../store/store";
 import { setUsername, setToken } from "./../../store/userSlice";
-import { useNavigate, useParams } from "react-router-dom";
-import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Checkbox,
   Container,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-  FormControlLabel,
   ButtonGroup,
+  Alert,
+  AlertTitle,
+  Typography,
 } from "@mui/material";
 import { Header } from "./../../components/Header";
 
@@ -39,10 +30,11 @@ export const Admin = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [limboList, setLimboList] = useState();
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
+  const [limboList, setLimboList] = useState([]);
 
-  const fetchAdminStatus = () => {
+  // Fetch admin status and limbo list every 2 seconds
+  const fetchData = () => {
     fetch(`/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -54,25 +46,46 @@ export const Admin = () => {
         }
       })
       .catch(() => {
-        console.log("ошибка проверки админа");
+        console.log("Ошибка проверки админа");
       });
-  };
-  fetchAdminStatus();
 
-  useEffect(() => {
     fetch("/limbo", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((response) => {
         setLimboList(response);
       })
-      .catch((response) => {
-        console.log("ошибка загрузки лимболиста");
+      .catch(() => {
+        console.log("Ошибка загрузки лимболиста");
       });
-  });
+  };
+
+  useEffect(() => {
+    // Initial fetch
+    fetchData();
+    // Set up interval to refresh every 2 seconds
+    const interval = setInterval(fetchData, 2000);
+    return () => clearInterval(interval); // Clean up interval on component unmount
+  }, [token, id, navigate]);
+
+  const handleReject = (userId) => {
+    fetch(`/limbo?userId=${userId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(fetchData)
+      .catch(() => console.log("Ошибка отклонения запроса"));
+  };
+
+  const handleApprove = (userId) => {
+    fetch(`/users/addAdminRole/${userId}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(fetchData)
+      .catch(() => console.log("Ошибка добавления прав администратора"));
+  };
 
   return (
     <div>
@@ -94,9 +107,20 @@ export const Admin = () => {
           gap: 24,
         }}
       >
-        {limboList?.map((user) => {
-          return (
-            <Alert severity="info" style={{ position: "relative" }}>
+        {limboList.length === 0 ? (
+          <Alert severity="info" style={{ padding: 20 }}>
+            <AlertTitle>Нет запросов</AlertTitle>
+            <Typography variant="body1">
+              В данный момент нет запросов на получение прав администратора.
+            </Typography>
+          </Alert>
+        ) : (
+          limboList.map((user) => (
+            <Alert
+              severity="info"
+              style={{ position: "relative" }}
+              key={user.id}
+            >
               <AlertTitle>Запрос на получение прав администратора</AlertTitle>
               {user.login} (id: {user.id}) запрашивает права администратора
               <ButtonGroup
@@ -107,32 +131,14 @@ export const Admin = () => {
                 }}
                 disableElevation
                 variant="outlined"
-                aria-label="Disabled button group"
+                aria-label="Admin request actions"
               >
-                <Button
-                  onClick={() => {
-                    fetch(`/limbo?userId=${user.id}`, {
-                      method: "DELETE",
-                      headers: { Authorization: `Bearer ${token}` },
-                    });
-                  }}
-                >
-                  отклонить
-                </Button>
-                <Button
-                  onClick={() => {
-                    fetch(`/users/addAdminRole/${user.id}`, {
-                      method: "PUT",
-                      headers: { Authorization: `Bearer ${token}` },
-                    });
-                  }}
-                >
-                  принять
-                </Button>
+                <Button onClick={() => handleReject(user.id)}>Отклонить</Button>
+                <Button onClick={() => handleApprove(user.id)}>Принять</Button>
               </ButtonGroup>
             </Alert>
-          );
-        })}
+          ))
+        )}
       </Container>
     </div>
   );

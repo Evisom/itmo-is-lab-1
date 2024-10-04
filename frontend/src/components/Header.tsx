@@ -54,15 +54,34 @@ export const Header: React.FC<HeaderProps> = ({
           >
             ОПЕРАЦИИ
           </Typography>
-          {isAdmin && (
-            <Typography
-              style={{ color: "white", textDecoration: "none" }}
-              component={"a"}
-              href="/admin"
-            >
-              АДМИНКА
-            </Typography>
-          )}
+          <Typography
+            style={{ color: "white", textDecoration: "none" }}
+            component={"a"}
+            href="/coordinates"
+          >
+            КООРДИНАТЫ
+          </Typography>
+          <Typography
+            style={{ color: "white", textDecoration: "none" }}
+            component={"a"}
+            href="/car"
+          >
+            МАШИНЫ
+          </Typography>
+
+          <Typography
+            style={{
+              color: "white",
+              textDecoration: "none",
+              opacity: isAdmin ? 1 : 0,
+              transition: "opacity 0.1s",
+            }}
+            component={"a"}
+            href="/admin"
+          >
+            АДМИНКА
+          </Typography>
+
           <div style={{ display: "flex", gap: 8 }}>
             <AccountCircleIcon />
             <Typography>{username}</Typography>

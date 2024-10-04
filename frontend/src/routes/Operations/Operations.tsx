@@ -52,7 +52,7 @@ export const Operations = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [limboList, setLimboList] = useState();
 
   const fetchAdminStatus = () => {
@@ -72,9 +72,12 @@ export const Operations = () => {
   };
   fetchAdminStatus();
 
-  const [action1, setAction1] = useState("результат");
-  const [action2, setAction2] = useState("результат");
-  const [action3, setAction3] = useState([]);
+  const [action1, setAction1] = useState("");
+  const [action1Result, setAction1Result] = useState("результат");
+  const [action2, setAction2] = useState("");
+  const [action2Result, setAction2Result] = useState("результат");
+  const [action3, setAction3] = useState("");
+  const [action3Result, setAction3Result] = useState([]);
 
   return (
     <div>
@@ -106,8 +109,31 @@ export const Operations = () => {
           </AccordionSummary>
           <AccordionDetails>
             <Stack direction={"row"} spacing={2}>
-              <TextField label="soundTrackName" size="small" />
-              <Button variant="outlined">запустить</Button>
+              <TextField
+                value={action1}
+                onChange={(e) => {
+                  setAction1(e.target.value);
+                }}
+                label="soundTrackName"
+                size="small"
+              />
+              <Button
+                onClick={() => {
+                  fetch(
+                    `/humanbeings/count/soundtrackName?soundtrackName=${action1}`,
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  )
+                    .then((response) => response.text())
+                    .then((response) => {
+                      setAction1Result(response);
+                    });
+                }}
+                variant="outlined"
+              >
+                запустить
+              </Button>
               <Paper
                 style={{
                   width: 150,
@@ -117,7 +143,7 @@ export const Operations = () => {
                 }}
                 elevation={8}
               >
-                {action1}
+                {action1Result}
               </Paper>
             </Stack>
           </AccordionDetails>
@@ -133,8 +159,28 @@ export const Operations = () => {
           </AccordionSummary>
           <AccordionDetails>
             <Stack direction={"row"} spacing={2}>
-              <TextField label="weaponType" size="small" />
-              <Button variant="outlined">запустить</Button>
+              <TextField
+                label="weaponType"
+                value={action2}
+                onChange={(e) => {
+                  setAction2(e.target.value);
+                }}
+                size="small"
+              />
+              <Button
+                onClick={() => {
+                  fetch(`/humanbeings/count/weaponType?weaponType=${action2}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  })
+                    .then((response) => response.text())
+                    .then((response) => {
+                      setAction2Result(response);
+                    });
+                }}
+                variant="outlined"
+              >
+                запустить
+              </Button>
               <Paper
                 style={{
                   width: 150,
@@ -144,7 +190,7 @@ export const Operations = () => {
                 }}
                 elevation={8}
               >
-                {action2}
+                {action2Result}
               </Paper>
             </Stack>
           </AccordionDetails>
@@ -160,10 +206,34 @@ export const Operations = () => {
           </AccordionSummary>
           <AccordionDetails>
             <Stack direction={"row"} spacing={2}>
-              <TextField label="soundTrackName" size="small" />
-              <Button variant="outlined">запустить</Button>
+              <TextField
+                value={action3}
+                onChange={(e) => {
+                  setAction3(e.target.value);
+                }}
+                label="soundTrackName"
+                size="small"
+              />
+              <Button
+                onClick={() => {
+                  fetch(
+                    `/humanbeings/soundtrackName?soundtrackName=${action2}`,
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  )
+                    .then((response) => response.json())
+                    .then((response) => {
+                      setAction3Result(response);
+                    })
+                    .catch((error) => console.log(error));
+                }}
+                variant="outlined"
+              >
+                запустить
+              </Button>
             </Stack>
-            {action3.length > 0 && (
+            {action3Result.length > 0 && (
               <TableContainer component={Paper} style={{ marginTop: 24 }}>
                 <Table
                   sx={{ minWidth: 650 }}
@@ -209,7 +279,17 @@ export const Operations = () => {
             Удалить всех героев без зубочисток.
           </AccordionSummary>
           <AccordionDetails>
-            <Button variant="outlined">запустить</Button>
+            <Button
+              onClick={() => {
+                fetch(`/humanbeings/no-toothpicks`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+              }}
+              variant="outlined"
+            >
+              запустить
+            </Button>
           </AccordionDetails>
         </Accordion>
         <Accordion>
@@ -222,7 +302,17 @@ export const Operations = () => {
             Kalina".
           </AccordionSummary>
           <AccordionDetails>
-            <Button variant="outlined">запустить</Button>
+            <Button
+              onClick={() => {
+                fetch(`/humanbeings/update/no-car`, {
+                  method: "PUT",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+              }}
+              variant="outlined"
+            >
+              запустить
+            </Button>
           </AccordionDetails>
         </Accordion>
       </Container>

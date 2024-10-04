@@ -18,6 +18,8 @@ import { createStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { Operations } from "./routes/Operations";
+import { Coordinates } from "./routes/Coordinates";
+import { Car } from "./routes/Car";
 
 const darkTheme = createTheme({
   palette: {
@@ -63,6 +65,14 @@ const router = createBrowserRouter([
   {
     path: "/operations",
     element: <Operations />,
+  },
+  {
+    path: "/coordinates",
+    element: <Coordinates />,
+  },
+  {
+    path: "/car",
+    element: <Car />,
   },
 ]);
 
