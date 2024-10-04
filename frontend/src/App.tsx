@@ -84,6 +84,7 @@ const App = () => {
         console.log("Ошибка загрузки таблицы");
       });
   }, [token]);
+  fetchData();
 
   useEffect(() => {
     const interval = setInterval(fetchData, 3000); // Update every 3 seconds
@@ -123,7 +124,16 @@ const App = () => {
     }) || [];
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "id",
+      headerName: "ID",
+      renderCell: (params) => (
+        <a style={{ color: "white" }} href={`/view/${params.row.id}`}>
+          {params.row.id}
+        </a>
+      ),
+      width: 90,
+    },
     { field: "name", headerName: "Имя", width: 150 },
     {
       field: "coordinates",
@@ -203,7 +213,11 @@ const App = () => {
                     handleDeleteHuman(params.row.id);
                   }}
                 />
-                <EditIcon />
+                <EditIcon
+                  onClick={() => {
+                    navigate(`/edit/${params.row.id}`);
+                  }}
+                />
               </>
             ) : (
               ""

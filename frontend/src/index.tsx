@@ -43,11 +43,11 @@ const router = createBrowserRouter([
     element: <ObjectPage type={"new"} />,
   },
   {
-    path: "/edit",
-    element: <ObjectPage type={"new"} />,
+    path: "/edit/:objectId",
+    element: <ObjectPage type={"edit"} />,
   },
   {
-    path: "/view",
+    path: "/view/:objectId",
     element: <ObjectPage type={"view"} />,
   },
 ]);

@@ -1,12 +1,11 @@
 // @ts-nocheck
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./../../store/store";
 import { setUsername, setToken } from "./../../store/userSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
-  AppBar,
   Button,
   Checkbox,
   Container,
@@ -20,10 +19,6 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { Header } from "./../../components/Header";
-import CheckIcon from "@mui/icons-material/Check";
-import ClearIcon from "@mui/icons-material/Clear";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import "./Object.scss";
 
 // Mood and WeaponType options
@@ -33,6 +28,7 @@ const weaponTypes = ["SHOTGUN", "RIFLE", "BAT"];
 export const ObjectPage = ({ type }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { objectId } = useParams();
 
   const username =
     useSelector((state: RootState) => state.user.username) ||
@@ -47,7 +43,7 @@ export const ObjectPage = ({ type }) => {
   );
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [editMode, setEditMode] = useState(false || type === "new");
+  const [editMode, setEditMode] = useState(false || type !== "view");
 
   const [humanBeing, setHumanBeing] = useState({
     name: "",
@@ -79,6 +75,37 @@ export const ObjectPage = ({ type }) => {
       });
   };
   fetchAdminStatus();
+
+  // Функция для загрузки данных объекта с сервера
+  useEffect(() => {
+    if (objectId && type !== "new") {
+      fetch(`/humanbeings/${objectId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setHumanBeing({
+            name: data.name,
+            coordinatesOption: "existing",
+            coordinates: { x: data.coordinates.x, y: data.coordinates.y },
+            coordinatesId: data.coordinates.id,
+            carOption: "existing",
+            car: { cool: data.car.cool },
+            carId: data.car.id,
+            realHero: data.realHero,
+            hasToothpick: data.hasToothpick,
+            mood: data.mood,
+            impactSpeed: data.impactSpeed,
+            soundtrackName: data.soundtrackName,
+            minutesOfWaiting: data.minutesOfWaiting,
+            weaponType: data.weaponType,
+          });
+        })
+        .catch(() => {
+          console.log("Ошибка загрузки данных объекта");
+        });
+    }
+  }, [objectId, token, type]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -143,23 +170,37 @@ export const ObjectPage = ({ type }) => {
       alert("Пожалуйста, заполните все поля правильно");
       return;
     }
-
-    console.log(JSON.stringify(humanBeing));
-
-    fetch(`/humanbeings?userId=${id}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(humanBeing),
-    }).then((response) => {
-      if (response.status === 200) {
-        console.log("добавлен");
-        navigate("/");
-      }
-    });
+    if (type === "new") {
+      fetch(`/humanbeings?userId=${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(humanBeing),
+      }).then((response) => {
+        if (response.status === 200) {
+          console.log("добавлен");
+          navigate("/");
+        }
+      });
+    } else {
+      fetch(`/humanbeings/${objectId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(humanBeing),
+      }).then((response) => {
+        if (response.status === 200) {
+          console.log("добавлен");
+          navigate("/");
+        }
+      });
+    }
   };
 
   return (
@@ -175,7 +216,34 @@ export const ObjectPage = ({ type }) => {
       />
       <Container maxWidth="xxl">
         <div className="object-controls">
-          <Typography variant="h4">Создать нового HumanBeing</Typography>
+          <Typography variant="h4">HumanBeing</Typography>
+          {type !== "new" && (
+            <div>
+              <Button
+                variant="outlined"
+                disabled={!(id === objectId || isAdmin)}
+                onClick={() => {
+                  setEditMode(!editMode);
+                }}
+              >
+                {editMode ? "выключить редактирование" : "редактировать"}
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={!(id === objectId || isAdmin)}
+                onClick={() => {
+                  fetch(`/humanbeings/${objectId}`, {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                  }).then(() => {
+                    navigate("/");
+                  });
+                }}
+              >
+                удалить
+              </Button>
+            </div>
+          )}
         </div>
         <div className="object">
           <div className="object-form">
@@ -186,7 +254,7 @@ export const ObjectPage = ({ type }) => {
                   name="name"
                   value={humanBeing.name}
                   onChange={handleInputChange}
-                  disabled={type === "view"}
+                  disabled={!editMode}
                   required
                 />
 
@@ -197,7 +265,7 @@ export const ObjectPage = ({ type }) => {
                     name="coordinatesOption"
                     value={humanBeing.coordinatesOption}
                     onChange={(e) => handleOptionChange(e, "coordinatesOption")}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     label="Координаты"
                   >
                     <MenuItem value="create">Создать новые</MenuItem>
@@ -214,7 +282,7 @@ export const ObjectPage = ({ type }) => {
                       type="number"
                       value={humanBeing.coordinates.x}
                       onChange={handleCoordinatesChange}
-                      disabled={type === "view"}
+                      disabled={!editMode}
                       required
                     />
                     <TextField
@@ -223,7 +291,7 @@ export const ObjectPage = ({ type }) => {
                       type="number"
                       value={humanBeing.coordinates.y}
                       onChange={handleCoordinatesChange}
-                      disabled={type === "view"}
+                      disabled={!editMode}
                       required
                       inputProps={{ min: -927 }}
                     />
@@ -234,7 +302,7 @@ export const ObjectPage = ({ type }) => {
                     name="coordinatesId"
                     value={humanBeing.coordinatesId}
                     onChange={handleInputChange}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     required
                   />
                 )}
@@ -246,7 +314,7 @@ export const ObjectPage = ({ type }) => {
                     name="carOption"
                     value={humanBeing.carOption}
                     onChange={(e) => handleOptionChange(e, "carOption")}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     label="Машина"
                   >
                     <MenuItem value="create">Создать новую</MenuItem>
@@ -262,7 +330,7 @@ export const ObjectPage = ({ type }) => {
                         checked={humanBeing.car.cool}
                         onChange={handleCarCoolChange}
                         name="carCool"
-                        disabled={type === "view"}
+                        disabled={!editMode}
                       />
                     }
                     label="Крутая машина"
@@ -273,7 +341,7 @@ export const ObjectPage = ({ type }) => {
                     name="carId"
                     value={humanBeing.carId}
                     onChange={handleInputChange}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     required
                   />
                 )}
@@ -284,7 +352,7 @@ export const ObjectPage = ({ type }) => {
                   type="number"
                   value={humanBeing.impactSpeed}
                   onChange={handleInputChange}
-                  disabled={type === "view"}
+                  disabled={!editMode}
                   required
                   inputProps={{ max: 154 }}
                 />
@@ -293,7 +361,7 @@ export const ObjectPage = ({ type }) => {
                   name="soundtrackName"
                   value={humanBeing.soundtrackName}
                   onChange={handleInputChange}
-                  disabled={type === "view"}
+                  disabled={!editMode}
                   required
                 />
                 <TextField
@@ -302,7 +370,7 @@ export const ObjectPage = ({ type }) => {
                   type="number"
                   value={humanBeing.minutesOfWaiting}
                   onChange={handleInputChange}
-                  disabled={type === "view"}
+                  disabled={!editMode}
                   required
                 />
 
@@ -312,7 +380,7 @@ export const ObjectPage = ({ type }) => {
                     name="mood"
                     value={humanBeing.mood}
                     onChange={handleInputChange}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     label="Настроение"
                   >
                     {moods.map((mood) => (
@@ -329,7 +397,7 @@ export const ObjectPage = ({ type }) => {
                     name="weaponType"
                     value={humanBeing.weaponType}
                     onChange={handleInputChange}
-                    disabled={type === "view"}
+                    disabled={!editMode}
                     label={"Тип оружия"}
                   >
                     {weaponTypes.map((weapon) => (
@@ -343,6 +411,11 @@ export const ObjectPage = ({ type }) => {
                 {type === "new" && (
                   <Button variant="outlined" color="primary" type="submit">
                     Создать
+                  </Button>
+                )}
+                {type !== "new" && editMode && (
+                  <Button variant="outlined" color="primary" type="submit">
+                    Сохранить
                   </Button>
                 )}
               </FormGroup>
