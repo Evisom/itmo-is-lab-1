@@ -2,7 +2,7 @@ package com.example.backend.service;
 
 
 import com.example.backend.domain.HumanBeing;
-import com.example.backend.domain.LimboModel;
+
 import com.example.backend.domain.User;
 import com.example.backend.entity.Limbo;
 import com.example.backend.repository.LimboRepo;

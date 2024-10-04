@@ -10,6 +10,7 @@ import com.example.backend.repository.UserRepo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public class UserService {
 
     @Autowired
     private LimboRepo limboRepo;
+
+    @Autowired
+    private LimboService limboService;
 
 
     public Optional<UserEntity> getByLogin(@NonNull String login) {
@@ -66,5 +70,14 @@ public class UserService {
         limboEntity.setUserid(userId);
         limboRepo.save(limboEntity);
     }
+
+    public User updateUserAdminRole(Long id) {
+        UserEntity userEntity = userRepo.findById(id).get();
+        userEntity.getRoles().add(Role.ADMIN);
+        userRepo.save(userEntity);
+        limboService.deleteUserFromLimbo(id);
+        return User.toModel(userEntity);
+    }
+
 
 }

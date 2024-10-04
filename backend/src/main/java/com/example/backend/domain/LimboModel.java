@@ -20,7 +20,7 @@ public class LimboModel {
     public static LimboModel toModel(Limbo limbo){
         LimboModel model = new LimboModel();
         model.setId(limbo.getId());
-//        model.setUser(User.toModel(limbo.getUser()));
+        model.setUserid(limbo.getUserid());;
         return model;
     }
 }

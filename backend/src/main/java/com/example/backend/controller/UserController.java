@@ -1,11 +1,13 @@
 package com.example.backend.controller;
 
+import com.example.backend.domain.User;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.exception.UserAlreadyExistException;
 import com.example.backend.exception.UserNotFoundException;
 import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,6 +30,17 @@ public class UserController {
         }
     }
 
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/addAdminRole/{id}")
+    public ResponseEntity<User> addAdminRole(@PathVariable Long id){
+        try {
+            return ResponseEntity.ok(userService.updateUserAdminRole(id));
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity deleteUser(@PathVariable Long id){
         try {
@@ -36,5 +49,7 @@ public class UserController {
             return ResponseEntity.badRequest().body("Произошла ошибка");
         }
     }
+
+
 
 }
