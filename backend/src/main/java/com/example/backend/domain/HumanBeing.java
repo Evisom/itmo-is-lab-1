@@ -12,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class HumanBeing {
     private Long id;
+    private Long userId;
     private String name;
     private Coordinates coordinates;
     private java.time.LocalDateTime creationDate;
@@ -27,6 +28,7 @@ public class HumanBeing {
     public static HumanBeing toModel(HumanBeingEntity humanBeingEntity){
         HumanBeing model = new HumanBeing();
         model.setId(humanBeingEntity.getId());
+        model.setUserId(humanBeingEntity.getUser().getId());
         model.setName(humanBeingEntity.getName());
         model.setCoordinates(humanBeingEntity.getCoordinates());
         model.setCreationDate(humanBeingEntity.getCreationDate());
