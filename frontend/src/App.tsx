@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./store/store"; // Import the RootState type
-import { setUsername } from "./store/userSlice"; // Import your actions
+import { setUsername, setToken } from "./store/userSlice"; // Import your actions
 import "./App.scss";
 import { redirect, useNavigate } from "react-router-dom";
 
@@ -9,11 +9,19 @@ const App = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const token = useSelector((state: RootState) => state.user.username);
+  const username = useSelector((state: RootState) => state.user.username);
+  const token = useSelector((state: RootState) => state.user.token);
 
   useEffect(() => {
-    if (!token) {
+    const cookieToken = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("accessToken="))
+      ?.split("=")[1];
+    if (!(token || cookieToken)) {
       // navigate("/login");
+    }
+    if (cookieToken && !token) {
+      dispatch(setToken(cookieToken));
     }
   }, [token, navigate]);
 
@@ -27,7 +35,11 @@ const App = () => {
     .then((response) => response.text())
     .then((data) => console.log(data));
 
-  return <div className="App">hello</div>;
+  return (
+    <div className="App">
+      hello, {username}, token: {token}
+    </div>
+  );
 };
 
 export default App;

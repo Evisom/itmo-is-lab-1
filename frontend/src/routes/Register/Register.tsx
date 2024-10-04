@@ -13,13 +13,16 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Register.scss";
+import { setUsername, setToken } from "../../store/userSlice";
 export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const [username, setUsername] = useState("");
+  const [username, setInputUsername] = useState("");
   const [usernameErrorText, setUsernameErrorText] = useState("");
 
   const [password, setPassword] = useState("");
@@ -28,6 +31,9 @@ export const Register = () => {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
   const [wantToBeAdmin, setWantToBeAdmin] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSuccessfulRegistration = () => {
     fetch("/api/auth/login", {
@@ -40,10 +46,19 @@ export const Register = () => {
         login: username,
         password: password,
       }),
-    }).then((response) => {
-      console.log(response.status);
-      console.log(response.text());
-    });
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+
+        dispatch(setUsername(username));
+        dispatch(setToken(response.accessToken)); // запишем при успешном логине в стор токен и юзернейм
+        navigate("/");
+      })
+      .then((response) => {})
+      .catch(() => {
+        setPasswordErrorText("Ошибка");
+      });
   };
 
   const handleRegister = () => {
@@ -126,7 +141,7 @@ export const Register = () => {
           variant="outlined"
           value={username}
           onChange={(e) => {
-            setUsername(e.target.value);
+            setInputUsername(e.target.value);
             setUsernameErrorText("");
           }}
           helperText={usernameErrorText}
