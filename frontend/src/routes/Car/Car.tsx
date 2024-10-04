@@ -150,11 +150,18 @@ export const Car = () => {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(() => {
+      .then((response) => {
+        if (response.status !== 204) {
+          alert(
+            "Объект не может быть удален так как с ним связаны другие объекты"
+          );
+        }
         fetchCars(); // Update the table after deletion
       })
       .catch(() => {
-        console.log("Ошибка удаления машины");
+        alert(
+          "Объект не может быть удален так как с ним связаны другие объекты"
+        );
       });
   };
 
@@ -176,9 +183,9 @@ export const Car = () => {
           <IconButton onClick={() => handleOpenEditDialog(params.row)}>
             <EditIcon />
           </IconButton>
-          {/* <IconButton onClick={() => handleDeleteCar(params.row.id)}>
+          <IconButton onClick={() => handleDeleteCar(params.row.id)}>
             <DeleteIcon />
-          </IconButton> */}
+          </IconButton>
         </div>
       ),
     },

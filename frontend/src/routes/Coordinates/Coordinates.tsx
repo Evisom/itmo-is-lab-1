@@ -160,7 +160,12 @@ export const Coordinates = () => {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(() => {
+      .then((response) => {
+        if (response.status !== 204) {
+          alert(
+            "Объект не может быть удален так как с ним связаны другие объекты"
+          );
+        }
         fetchCoordinates(); // Update the table after deletion
       })
       .catch(() => {
@@ -182,9 +187,9 @@ export const Coordinates = () => {
           <IconButton onClick={() => handleOpenEditDialog(params.row)}>
             <EditIcon />
           </IconButton>
-          {/* <IconButton onClick={() => handleDeleteCoordinates(params.row.id)}>
+          <IconButton onClick={() => handleDeleteCoordinates(params.row.id)}>
             <DeleteIcon />
-          </IconButton> */}
+          </IconButton>
         </div>
       ),
     },
