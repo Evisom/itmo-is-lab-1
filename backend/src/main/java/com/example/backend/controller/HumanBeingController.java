@@ -4,6 +4,7 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.service.HumanBeingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +60,37 @@ public class HumanBeingController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+
+    @GetMapping("/count/soundtrackName")
+    public ResponseEntity<Integer> getHumanCountBySoundtrackName(@RequestParam String soundtrackName) {
+        int count = humanBeingService.getHumanCountBySoundtrackName(soundtrackName);
+        return  ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/count/weaponType")
+    public ResponseEntity<Integer> getHumanCountByWeaponType(@RequestParam String weaponType) {
+        int count = humanBeingService.getHumanCountByWeaponType(weaponType);
+        return  ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/soundtrackName")
+    public ResponseEntity<List<HumanBeing>> getHumansBySoundtrackName(@RequestParam String soundtrackName) {
+        List<HumanBeing> humans = humanBeingService.getHumansBySoundtrackName(soundtrackName);
+        return  ResponseEntity.ok(humans);
+    }
+
+    @DeleteMapping("/no-toothpicks")
+    public ResponseEntity<Void> deleteHumansWithoutToothpicks() {
+        humanBeingService.deleteHumansWithoutToothpicks();
+        return  ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/update/no-car")
+    public ResponseEntity<Void> updateHumansWithoutCars() {
+        humanBeingService.updateHumansWithoutCars();
+        return  ResponseEntity.noContent().build();
     }
 
 }

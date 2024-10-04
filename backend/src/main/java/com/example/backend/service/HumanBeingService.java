@@ -11,6 +11,7 @@ import com.example.backend.repository.HumanBeingRepo;
 import com.example.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -126,5 +127,29 @@ public class HumanBeingService {
             return true;
         }
         return false;
+    }
+
+
+
+    public int getHumanCountBySoundtrackName(String soundtrackName) {
+        return humanBeingRepo.getHumanCountBySoundtrackName(soundtrackName);
+    }
+
+    public int getHumanCountByWeaponType(String weaponType) {
+        return humanBeingRepo.getHumanCountByWeaponType(weaponType);
+    }
+
+    public List<HumanBeing> getHumansBySoundtrackName(String soundtrackName) {
+        return humanBeingRepo.getHumansBySoundtrackName(soundtrackName).stream().map(HumanBeing::toModel).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteHumansWithoutToothpicks() {
+        humanBeingRepo.deleteHumansWithoutToothpicks();
+    }
+
+    @Transactional
+    public void updateHumansWithoutCars() {
+        humanBeingRepo.updateHumansWithoutCars();
     }
 }
