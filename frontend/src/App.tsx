@@ -44,6 +44,8 @@ const App = () => {
       localStorage.getItem("id")
   );
 
+  console.log(username, id, token);
+
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [tableData, setTableData] = useState<any[]>([]);
@@ -52,6 +54,20 @@ const App = () => {
     page: 0,
     pageSize: 5,
   });
+
+  const fetchAdminStatus = () => {
+    fetch(`/users/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        setIsAdmin(response.roles.includes("ADMIN"));
+      })
+      .catch(() => {
+        console.log("ошибка проверки админа");
+      });
+  };
+  fetchAdminStatus();
 
   const fetchData = useCallback(() => {
     fetch("/humanbeings", { headers: { Authorization: `Bearer ${token}` } })
@@ -179,7 +195,7 @@ const App = () => {
               height: "100%",
             }}
           >
-            {Number(params.row.userId) === id ? (
+            {Number(params.row.userId) === id || isAdmin ? (
               <>
                 <DeleteIcon
                   onClick={() => {
@@ -208,7 +224,7 @@ const App = () => {
           navigate("/");
         }}
       />
-      <Container>
+      <Container style={{ marginTop: 24 }}>
         <TextField
           label="Поиск"
           variant="outlined"
