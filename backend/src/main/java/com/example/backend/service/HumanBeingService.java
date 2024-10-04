@@ -32,25 +32,40 @@ public class HumanBeingService {
     @Autowired
     private CoordinatesRepo coordinatesRepo;
 
-    public HumanBeing getHumanBeing(Long id){
+    public HumanBeing getHumanBeing(Long id) {
         HumanBeingEntity humanBeing = humanBeingRepo.findById(id).get();
         return HumanBeing.toModel(humanBeing);
     }
+
     public List<HumanBeing> getAllHumanBeing() {
         return humanBeingRepo.findAll().stream().map(HumanBeing::toModel).collect(Collectors.toList());
     }
 
-    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId){
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) {
         UserEntity user = userRepo.findById(userId).get();
 
-        Coordinates coordinates = new Coordinates();
-        coordinates.setX(human.getCoordinates().getX());
-        coordinates.setY(human.getCoordinates().getY());
-        coordinatesRepo.save(coordinates);
+        Long carId = human.getCar().getId();
+        Car car;
+        if (carId == null) {
+            car = new Car();
+            car.setCool(human.getCar().getCool());
+            carRepo.save(car);
+        } else {
+            car = carRepo.findById(carId).get();
 
-        Car car = new Car();
-        car.setCool(human.getCar().getCool());
-        carRepo.save(car);
+        }
+
+        Long coorId = human.getCoordinates().getId();
+        Coordinates coordinates;
+        if (coorId == null) {
+            coordinates = new Coordinates();
+            coordinates.setX(human.getCoordinates().getX());
+            coordinates.setY(human.getCoordinates().getY());
+            coordinatesRepo.save(coordinates);
+        } else {
+            coordinates = coordinatesRepo.findById(coorId).get();
+
+        }
 
         human.setCar(car);
         human.setCoordinates(coordinates);
