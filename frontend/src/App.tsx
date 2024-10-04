@@ -13,15 +13,14 @@ const App = () => {
   const token = useSelector((state: RootState) => state.user.token);
 
   useEffect(() => {
-    const cookieToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("accessToken="))
-      ?.split("=")[1];
-    if (!(token || cookieToken)) {
+    const lsToken = localStorage.getItem("token");
+    const lsUsername = localStorage.getItem("username");
+    if (!(token || lsToken)) {
       // navigate("/login");
     }
-    if (cookieToken && !token) {
-      dispatch(setToken(cookieToken));
+    if (lsToken && !token) {
+      dispatch(setToken(lsToken + ""));
+      dispatch(setUsername(lsUsername + ""));
     }
   }, [token, navigate]);
 

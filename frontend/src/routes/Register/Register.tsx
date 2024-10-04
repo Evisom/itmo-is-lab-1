@@ -66,7 +66,9 @@ export const Register = () => {
         .then((response) => response.json())
         .then((response) => {
           dispatch(setUsername(username));
-          dispatch(setToken(response.accessToken)); // запишем при успешном логине в стор токен и юзернейм
+          dispatch(setToken(response.accessToken));
+          localStorage.setItem("username", username);
+          localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
           navigate("/");
         })
         .catch(() => {
