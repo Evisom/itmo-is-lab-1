@@ -3,6 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 // Определим интерфейс для пропсов компонента Header
 interface HeaderProps {
@@ -16,10 +17,17 @@ export const Header: React.FC<HeaderProps> = ({
   username,
   onLogout,
 }) => {
+  const navigate = useNavigate();
   return (
     <AppBar position="sticky">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography
+          variant="h6"
+          component="a"
+          href="/"
+          sx={{ flexGrow: 1 }}
+          style={{ color: "white", textDecoration: "none" }}
+        >
           IS-LAB-1
         </Typography>
         <div
@@ -29,7 +37,13 @@ export const Header: React.FC<HeaderProps> = ({
             alignItems: "center",
           }}
         >
-          <Button color="inherit" variant="outlined">
+          <Button
+            color="inherit"
+            variant="outlined"
+            onClick={() => {
+              navigate("/new");
+            }}
+          >
             Создать
             <AddIcon />
           </Button>

@@ -8,6 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Login } from "./routes/Login";
 import { Register } from "./routes/Register";
+import { ObjectPage } from "./routes/Object";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -38,8 +39,16 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/register",
-    element: <Register />,
+    path: "/new",
+    element: <ObjectPage type={"new"} />,
+  },
+  {
+    path: "/edit",
+    element: <ObjectPage type={"new"} />,
+  },
+  {
+    path: "/view",
+    element: <ObjectPage type={"view"} />,
   },
 ]);
 

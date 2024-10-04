@@ -48,6 +48,7 @@ const App = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Инициализируем tableData как пустой массив
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [paginationModel, setPaginationModel] = useState({
@@ -73,18 +74,17 @@ const App = () => {
     fetch("/humanbeings", { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => response.json())
       .then((response) => {
-        setTableData((prevData) => {
-          if (JSON.stringify(prevData) !== JSON.stringify(response)) {
-            return response;
-          }
-          return prevData; // No change
-        });
+        if (Array.isArray(response)) {
+          setTableData(response);
+        } else {
+          setTableData([]); // Если данные не массив, устанавливаем пустой массив
+        }
       })
       .catch(() => {
         console.log("Ошибка загрузки таблицы");
       });
-  }, []);
-  fetchData();
+  }, [token]);
+
   useEffect(() => {
     const interval = setInterval(fetchData, 3000); // Update every 3 seconds
     return () => clearInterval(interval); // Clear interval on component unmount
@@ -110,16 +110,17 @@ const App = () => {
     fetch(`/humanbeings/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
+    }).then(() => {
+      fetchData(); // Перезагружаем данные после удаления
     });
-    fetchData();
-    console.log(id);
   };
 
-  const filteredData = tableData.filter((row) => {
-    return Object.values(row)
-      .flatMap((val) => (typeof val === "object" ? Object.values(val) : val))
-      .some((field) => field.toString().toLowerCase().includes(searchQuery));
-  });
+  const filteredData =
+    tableData?.filter((row) => {
+      return Object.values(row)
+        .flatMap((val) => (typeof val === "object" ? Object.values(val) : val))
+        .some((field) => field.toString().toLowerCase().includes(searchQuery));
+    }) || [];
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 90 },
