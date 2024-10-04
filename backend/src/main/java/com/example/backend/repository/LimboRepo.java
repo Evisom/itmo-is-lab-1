@@ -4,4 +4,9 @@ import com.example.backend.entity.Limbo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LimboRepo extends JpaRepository<Limbo, Long> {
+
+    void deleteByUserid(Long userid);
+
+
+    boolean existsByUserid(Long userid);
 }

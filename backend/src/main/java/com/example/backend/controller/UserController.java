@@ -17,7 +17,6 @@ public class UserController {
 
 
 
-
     @GetMapping("/id")
     public ResponseEntity getOneUser(@PathVariable Long id ){
         try {

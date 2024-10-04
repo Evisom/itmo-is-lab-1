@@ -51,7 +51,7 @@ public class AuthService {
             roles.add(Role.ADMIN);
             userService.save(newUser);
         } else if (wantBeAdmin) {
-            userService.goToLimbo(newUser);
+            userService.goToLimbo(newUser.getId());
         }
 
         final String accessToken = jwtProvider.generateAccessToken(newUser);
