@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -53,10 +54,6 @@ public class AuthService {
             userService.goToLimbo(newUser);
         }
 
-
-
-
-
         final String accessToken = jwtProvider.generateAccessToken(newUser);
         final String refreshToken = jwtProvider.generateRefreshToken(newUser);
         refreshStorage.put(newUser.getLogin(), refreshToken);
@@ -66,8 +63,9 @@ public class AuthService {
 
     public JwtResponse login(@NonNull JwtRequest authRequest) {
         final UserEntity user = userService.getByLogin(authRequest.getLogin())
-                .orElseThrow(() -> new AuthException("Пользователь не найден"));
-        if (user.getPassword().equals(authRequest.getPassword())) {
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+        String hashedPassword = PasswordHash384.encryptThisString(authRequest.getPassword());
+        if (hashedPassword.equals(user.getPassword())) {
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
             refreshStorage.put(user.getLogin(), refreshToken);
