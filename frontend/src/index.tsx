@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Login } from "./routes/Login";
 import { Register } from "./routes/Register";
 import { ObjectPage } from "./routes/Object";
+import { Admin } from "./routes/Admin";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
+    path: "/register",
+    element: <Register />,
+  },
+  {
     path: "/new",
     element: <ObjectPage type={"new"} />,
   },
@@ -49,6 +54,10 @@ const router = createBrowserRouter([
   {
     path: "/view/:objectId",
     element: <ObjectPage type={"view"} />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
   },
 ]);
 

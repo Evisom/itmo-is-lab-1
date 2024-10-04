@@ -7,19 +7,10 @@ import "./App.scss";
 import { useNavigate } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
-  AppBar,
   Button,
   Checkbox,
   Container,
-  Icon,
-  Menu,
-  MenuItem,
-  Paper,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
-  Toolbar,
   Typography,
 } from "@mui/material";
 import { Header } from "./components/Header";
@@ -44,11 +35,7 @@ const App = () => {
       localStorage.getItem("id")
   );
 
-  console.log(username, id, token);
-
   const [isAdmin, setIsAdmin] = useState(false);
-
-  // Инициализируем tableData как пустой массив
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [paginationModel, setPaginationModel] = useState({
@@ -56,7 +43,7 @@ const App = () => {
     pageSize: 5,
   });
 
-  const fetchAdminStatus = () => {
+  const fetchAdminStatus = useCallback(() => {
     fetch(`/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -65,10 +52,9 @@ const App = () => {
         setIsAdmin(response.roles.includes("ADMIN"));
       })
       .catch(() => {
-        console.log("ошибка проверки админа");
+        console.log("Ошибка проверки админа");
       });
-  };
-  fetchAdminStatus();
+  }, [id, token]);
 
   const fetchData = useCallback(() => {
     fetch("/humanbeings", { headers: { Authorization: `Bearer ${token}` } })
@@ -84,11 +70,17 @@ const App = () => {
         console.log("Ошибка загрузки таблицы");
       });
   }, [token]);
-  fetchData();
 
+  // Правильное использование fetchAdminStatus
   useEffect(() => {
-    const interval = setInterval(fetchData, 3000); // Update every 3 seconds
-    return () => clearInterval(interval); // Clear interval on component unmount
+    fetchAdminStatus();
+  }, [fetchAdminStatus]);
+
+  // Вызов fetchData только при монтировании компонента и каждые 3 секунды
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 3000); // Обновление каждые 3 секунды
+    return () => clearInterval(interval); // Очистка интервала при размонтировании
   }, [fetchData]);
 
   useEffect(() => {
@@ -101,7 +93,7 @@ const App = () => {
       dispatch(setToken(lsToken + ""));
       dispatch(setUsername(lsUsername + ""));
     }
-  }, [token, navigate]);
+  }, [token, navigate, dispatch]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
@@ -139,7 +131,7 @@ const App = () => {
       field: "coordinates",
       headerName: "Координаты",
       renderCell: (params) =>
-        `X: ${params.row.coordinates.x}, Y: ${params.row.coordinates.y}`,
+        `id: ${params.row.coordinates.id} X: ${params.row.coordinates.x}, Y: ${params.row.coordinates.y}`,
       width: 180,
     },
     { field: "creationDate", headerName: "Дата создания", width: 180 },

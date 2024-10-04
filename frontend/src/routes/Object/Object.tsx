@@ -170,6 +170,13 @@ export const ObjectPage = ({ type }) => {
       alert("Пожалуйста, заполните все поля правильно");
       return;
     }
+    const bodyObject = humanBeing;
+    if (humanBeing.carId) {
+      bodyObject.car.id = humanBeing.carId;
+    }
+    if (humanBeing.coordinatesId) {
+      bodyObject.coordinates.id = humanBeing.coordinatesId;
+    }
     if (type === "new") {
       fetch(`/humanbeings?userId=${id}`, {
         method: "POST",
@@ -178,7 +185,7 @@ export const ObjectPage = ({ type }) => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(humanBeing),
+        body: JSON.stringify(bodyObject),
       }).then((response) => {
         if (response.status === 200) {
           console.log("добавлен");
@@ -193,10 +200,11 @@ export const ObjectPage = ({ type }) => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(humanBeing),
+        body: JSON.stringify(bodyObject),
       }).then((response) => {
         if (response.status === 200) {
-          console.log("добавлен");
+          console.log("обновлен");
+          console.log(bodyObject);
           navigate("/");
         }
       });
