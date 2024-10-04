@@ -71,12 +71,12 @@ public class UserService {
         limboRepo.save(limboEntity);
     }
 
-    public User addAdmin(Long id) {
-        UserEntity user = userRepo.findById(id).get();
-        user.getRoles().add(Role.ADMIN);
-        userRepo.save(user);
+    public User updateUserAdminRole(Long id) {
+        UserEntity userEntity = userRepo.findById(id).get();
+        userEntity.getRoles().add(Role.ADMIN);
+        userRepo.save(userEntity);
         limboService.deleteUserFromLimbo(id);
-        return User.toModel(user);
+        return User.toModel(userEntity);
     }
 
 

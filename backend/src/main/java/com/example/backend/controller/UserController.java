@@ -31,14 +31,13 @@ public class UserController {
     }
 
 
-    @PreAuthorize("ADMIN")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/addAdminRole/{id}")
-
     public ResponseEntity<User> addAdminRole(@PathVariable Long id){
         try {
-            return ResponseEntity.ok(userService.addAdmin(id));
+            return ResponseEntity.ok(userService.updateUserAdminRole(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
