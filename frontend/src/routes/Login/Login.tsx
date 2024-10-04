@@ -53,20 +53,19 @@ export const Login = () => {
         login: username,
         password: password,
       }),
-    }).then((response) => {
-      switch (response.status) {
-        case 200: {
-          console.log("успешно залогинились");
-          dispatch(setUsername(username));
-          dispatch(setToken("token")); // запишем при успешном логине в стор токен и юзернейм
-          navigate("/");
-          break;
-        }
-        default: {
-          setPasswordErrorText("Неправильный пароль");
-        }
-      }
-    });
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+
+        dispatch(setUsername(username));
+        dispatch(setToken(response.accessToken)); // запишем при успешном логине в стор токен и юзернейм
+        navigate("/");
+      })
+      .then((response) => {})
+      .catch(() => {
+        setPasswordErrorText("Неправильный пароль");
+      });
   };
 
   return (
@@ -91,9 +90,13 @@ export const Login = () => {
           <InputLabel htmlFor="outlined-adornment-password">Пароль</InputLabel>
           <OutlinedInput
             value={password}
-            onChange={(e) => setInputPassword(e.target.value)}
+            onChange={(e) => {
+              setInputPassword(e.target.value);
+              setPasswordErrorText("");
+            }}
             id="outlined-adornment-password"
             type={showPassword ? "text" : "password"}
+            error={!!passwordErrorText}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
