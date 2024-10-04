@@ -60,18 +60,26 @@ public class HumanBeingService {
 
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
+        Car car = carRepo.findById(humanBeingDetails.getCar().getId()).get();
+        Coordinates coordinates = coordinatesRepo.findById(humanBeingDetails.getCoordinates().getId()).get();
+
+        car.setCool(humanBeingDetails.getCar().getCool());
+
+        coordinates.setX(humanBeingDetails.getCoordinates().getX());
+        coordinates.setY(humanBeingDetails.getCoordinates().getY());
+
 
         humanBeingEntity.setName(humanBeingDetails.getName());
-        humanBeingEntity.setCoordinates(humanBeingDetails.getCoordinates());
         humanBeingEntity.setRealHero(humanBeingDetails.getRealHero());
         humanBeingEntity.setHasToothpick(humanBeingDetails.getHasToothpick());
-        humanBeingEntity.setCar(humanBeingDetails.getCar());
         humanBeingEntity.setMood(humanBeingDetails.getMood());
         humanBeingEntity.setImpactSpeed(humanBeingDetails.getImpactSpeed());
         humanBeingEntity.setSoundtrackName(humanBeingDetails.getSoundtrackName());
         humanBeingEntity.setMinutesOfWaiting(humanBeingDetails.getMinutesOfWaiting());
         humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
 
+        carRepo.save(car);
+        coordinatesRepo.save(coordinates);
         humanBeingRepo.save(humanBeingEntity);
 
         return HumanBeing.toModel(humanBeingEntity);
