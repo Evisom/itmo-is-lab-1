@@ -35,32 +35,6 @@ export const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSuccessfulRegistration = () => {
-    fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        login: username,
-        password: password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        console.log(response);
-
-        dispatch(setUsername(username));
-        dispatch(setToken(response.accessToken)); // запишем при успешном логине в стор токен и юзернейм
-        navigate("/");
-      })
-      .then((response) => {})
-      .catch(() => {
-        setPasswordErrorText("Ошибка");
-      });
-  };
-
   const handleRegister = () => {
     let valid = true;
     if (!isPasswordMatch()) {
@@ -78,8 +52,7 @@ export const Register = () => {
     }
 
     if (valid) {
-      console.log("запрос пошел");
-      fetch("/users", {
+      fetch("/api/auth/registration?wantBeAdmin=" + wantToBeAdmin, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -89,20 +62,18 @@ export const Register = () => {
           login: username,
           password: password,
         }),
-      }).then((response) => {
-        console.log(response.status);
-        switch (response.status) {
-          case 200: {
-            console.log("Успех");
-            handleSuccessfulRegistration();
-            break;
-          }
-          case 400: {
-            console.log("Ошибка на сервере");
-            setUsernameErrorText("Имя занято");
-          }
-        }
-      });
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          dispatch(setUsername(username));
+          dispatch(setToken(response.accessToken));
+          localStorage.setItem("username", username);
+          localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
+          navigate("/");
+        })
+        .catch(() => {
+          setUsernameErrorText("Имя занято");
+        });
     }
   };
 
