@@ -15,7 +15,7 @@ import { useState } from "react";
 import "./Login.scss";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setUsername, setToken } from "../../store/userSlice";
+import { setUsername, setToken, setId } from "../../store/userSlice";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -60,6 +60,8 @@ export const Login = () => {
 
         dispatch(setUsername(username));
         dispatch(setToken(response.accessToken));
+        dispatch(setId(response.userId));
+        localStorage.setItem("id", response.userId);
         localStorage.setItem("username", username);
         localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
         navigate("/");

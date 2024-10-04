@@ -4,12 +4,14 @@ interface UserState {
   username: string;
   isAdmin: boolean;
   token: string;
+  id: number | null;
 }
 
 const initialState: UserState = {
   username: "",
   isAdmin: false, // Assuming this is a boolean
   token: "",
+  id: null,
 };
 
 export const userSlice = createSlice({
@@ -25,8 +27,11 @@ export const userSlice = createSlice({
     setIsAdmin: (state, action: PayloadAction<boolean>) => {
       state.isAdmin = action.payload; // Access the payload
     },
+    setId: (state, action: PayloadAction<number>) => {
+      state.id = action.payload;
+    },
   },
 });
 
-export const { setUsername, setToken, setIsAdmin } = userSlice.actions;
+export const { setUsername, setToken, setIsAdmin, setId } = userSlice.actions;
 export default userSlice.reducer;

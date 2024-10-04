@@ -8,6 +8,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Login } from "./routes/Login";
 import { Register } from "./routes/Register";
+import { ObjectPage } from "./routes/Object";
+import { Admin } from "./routes/Admin";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -15,6 +17,7 @@ import "@fontsource/roboto/700.css";
 import { createStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import { Operations } from "./routes/Operations";
 
 const darkTheme = createTheme({
   palette: {
@@ -40,6 +43,26 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/new",
+    element: <ObjectPage type={"new"} />,
+  },
+  {
+    path: "/edit/:objectId",
+    element: <ObjectPage type={"edit"} />,
+  },
+  {
+    path: "/view/:objectId",
+    element: <ObjectPage type={"view"} />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
+  },
+  {
+    path: "/operations",
+    element: <Operations />,
   },
 ]);
 
