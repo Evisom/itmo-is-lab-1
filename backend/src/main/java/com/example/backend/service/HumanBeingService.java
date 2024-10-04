@@ -60,8 +60,8 @@ public class HumanBeingService {
 
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
-        Car car = carRepo.findById(humanBeingDetails.getCar().getId()).get();
-        Coordinates coordinates = coordinatesRepo.findById(humanBeingDetails.getCoordinates().getId()).get();
+        Car car = carRepo.findById(humanBeingEntity.getCar().getId()).get();
+        Coordinates coordinates = coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).get();
 
         car.setCool(humanBeingDetails.getCar().getCool());
 
