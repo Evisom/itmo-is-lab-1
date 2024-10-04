@@ -20,14 +20,14 @@ public class CoordinatesController {
     private CoordinatesService coordinatesService;
 
     @GetMapping
-    public ResponseEntity<List<Coordinates>> getAllCars(){
+    public ResponseEntity<List<Coordinates>> getAllCoordinates(){
         return ResponseEntity.ok(coordinatesService.getAllCoordinates());
 
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Coordinates> getCarById(@PathVariable Long id ){
+    public ResponseEntity<Coordinates> getCoordinatesById(@PathVariable Long id ){
         try {
             return ResponseEntity.ok(coordinatesService.getOne(id).orElseThrow(() ->new NoEntityException("No such coordinates")));
         }catch (Exception e){
@@ -36,7 +36,7 @@ public class CoordinatesController {
     }
 
     @PostMapping
-    public ResponseEntity<Coordinates> createCar(@RequestBody Coordinates coordinates){
+    public ResponseEntity<Coordinates> createCoordinates(@RequestBody Coordinates coordinates){
         try {
             return ResponseEntity.ok(coordinatesService.createCoordinates(coordinates));
         }catch (Exception e){
@@ -45,10 +45,20 @@ public class CoordinatesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Coordinates> updateHumanBeing(@PathVariable Long id, @RequestBody Coordinates coordinates) {
+    public ResponseEntity<Coordinates> updateCoordinates(@PathVariable Long id, @RequestBody Coordinates coordinates) {
         try {
             return ResponseEntity.ok(coordinatesService.updateCoordinates(id, coordinates));
         }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCoordinates(@PathVariable Long id) {
+
+        if (coordinatesService.deleteCoordinates(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
