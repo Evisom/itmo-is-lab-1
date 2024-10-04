@@ -25,15 +25,26 @@ import {
 import { Header } from "./components/Header";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 const App = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const username = useSelector((state: RootState) => state.user.username);
-  const token = useSelector((state: RootState) => state.user.token);
+  const username =
+    useSelector((state: RootState) => state.user.username) ||
+    localStorage.getItem("username");
+  const token =
+    useSelector((state: RootState) => state.user.token) ||
+    localStorage.getItem("token");
 
-  const isAdmin = true;
+  const id = Number(
+    useSelector((state: RootState) => state.user.id) ||
+      localStorage.getItem("id")
+  );
+
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -43,7 +54,7 @@ const App = () => {
   });
 
   const fetchData = useCallback(() => {
-    fetch("/humanbeings")
+    fetch("/humanbeings", { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => response.json())
       .then((response) => {
         setTableData((prevData) => {
@@ -79,6 +90,15 @@ const App = () => {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
+  const handleDeleteHuman = (id) => {
+    fetch(`/humanbeings/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchData();
+    console.log(id);
+  };
+
   const filteredData = tableData.filter((row) => {
     return Object.values(row)
       .flatMap((val) => (typeof val === "object" ? Object.values(val) : val))
@@ -99,15 +119,36 @@ const App = () => {
     {
       field: "realHero",
       headerName: "Real hero?",
-      renderCell: (params) =>
-        params.row.realHero ? <CheckIcon /> : <ClearIcon />,
+      renderCell: (params) => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          {params.row.realHero ? <CheckIcon /> : <ClearIcon />}
+        </div>
+      ),
       width: 120,
     },
     {
       field: "hasToothpick",
       headerName: "Зубочистка",
-      renderCell: (params) =>
-        params.row.hasToothpick ? <CheckIcon /> : <ClearIcon />,
+      renderCell: (params) => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          {params.row.hasToothpick ? <CheckIcon /> : <ClearIcon />}
+        </div>
+      ),
+
       width: 120,
     },
     {
@@ -124,6 +165,36 @@ const App = () => {
     { field: "soundtrackName", headerName: "Саундтрек", width: 180 },
     { field: "minutesOfWaiting", headerName: "Минуты ожидания", width: 150 },
     { field: "weaponType", headerName: "Оружие", width: 150 },
+    {
+      field: "actions",
+      headerName: "Действия",
+      width: 150,
+      renderCell: (params) => {
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            {Number(params.row.userId) === id ? (
+              <>
+                <DeleteIcon
+                  onClick={() => {
+                    handleDeleteHuman(params.row.id);
+                  }}
+                />
+                <EditIcon />
+              </>
+            ) : (
+              ""
+            )}
+          </div>
+        );
+      },
+    },
   ];
 
   return (
