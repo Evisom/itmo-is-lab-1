@@ -75,13 +75,32 @@ public class HumanBeingService {
 
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
-        Car car = carRepo.findById(humanBeingEntity.getCar().getId()).get();
-        Coordinates coordinates = coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).get();
+        Car car;
+        Coordinates coordinates ;
 
-        car.setCool(humanBeingDetails.getCar().getCool());
+        Long carId = humanBeingDetails.getCar().getId();
 
-        coordinates.setX(humanBeingDetails.getCoordinates().getX());
-        coordinates.setY(humanBeingDetails.getCoordinates().getY());
+        if (carId == null) {
+            car = carRepo.findById(humanBeingEntity.getCar().getId()).get();
+            car.setCool(humanBeingDetails.getCar().getCool());
+            carRepo.save(car);
+        } else {
+            humanBeingEntity.setCar(carRepo.findById(carId).get());
+        }
+
+
+        Long coorId = humanBeingDetails.getCoordinates().getId();
+        if (coorId == null) {
+            coordinates =  coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).get();
+            coordinates.setX(humanBeingDetails.getCoordinates().getX());
+            coordinates.setY(humanBeingDetails.getCoordinates().getY());
+            coordinatesRepo.save(coordinates);
+        } else {
+            humanBeingEntity.setCoordinates(coordinatesRepo.findById(coorId).get());
+
+        }
+
+
 
 
         humanBeingEntity.setName(humanBeingDetails.getName());
@@ -93,8 +112,8 @@ public class HumanBeingService {
         humanBeingEntity.setMinutesOfWaiting(humanBeingDetails.getMinutesOfWaiting());
         humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
 
-        carRepo.save(car);
-        coordinatesRepo.save(coordinates);
+
+
         humanBeingRepo.save(humanBeingEntity);
 
         return HumanBeing.toModel(humanBeingEntity);
