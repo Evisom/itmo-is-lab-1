@@ -47,7 +47,22 @@ export const Header: React.FC<HeaderProps> = ({
             Создать
             <AddIcon />
           </Button>
-          {isAdmin && <Button color="inherit">админка</Button>}
+          <Typography
+            style={{ color: "white", textDecoration: "none" }}
+            component={"a"}
+            href="/operations"
+          >
+            ОПЕРАЦИИ
+          </Typography>
+          {isAdmin && (
+            <Typography
+              style={{ color: "white", textDecoration: "none" }}
+              component={"a"}
+              href="/admin"
+            >
+              АДМИНКА
+            </Typography>
+          )}
           <div style={{ display: "flex", gap: 8 }}>
             <AccountCircleIcon />
             <Typography>{username}</Typography>

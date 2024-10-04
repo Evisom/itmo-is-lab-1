@@ -17,6 +17,7 @@ import "@fontsource/roboto/700.css";
 import { createStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import { Operations } from "./routes/Operations";
 
 const darkTheme = createTheme({
   palette: {
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: <Admin />,
+  },
+  {
+    path: "/operations",
+    element: <Operations />,
   },
 ]);
 
