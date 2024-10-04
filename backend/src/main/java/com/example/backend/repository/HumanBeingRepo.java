@@ -25,6 +25,6 @@ public interface HumanBeingRepo extends JpaRepository<HumanBeingEntity, Long> {
     void deleteHumansWithoutToothpicks();
 
     @Modifying
-    @Query(value = "CALL update_humans_cars_to_cool()", nativeQuery = true)
+    @Query(value = "SELECT update_humans_cars_to_cool()", nativeQuery = true)
     void updateHumansWithoutCars();
 }
