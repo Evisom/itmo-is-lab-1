@@ -54,6 +54,20 @@ export const Header: React.FC<HeaderProps> = ({
           >
             ОПЕРАЦИИ
           </Typography>
+          <Typography
+            style={{ color: "white", textDecoration: "none" }}
+            component={"a"}
+            href="/coordinates"
+          >
+            КООРДИНАТЫ
+          </Typography>
+          <Typography
+            style={{ color: "white", textDecoration: "none" }}
+            component={"a"}
+            href="/car"
+          >
+            МАШИНЫ
+          </Typography>
           {isAdmin && (
             <Typography
               style={{ color: "white", textDecoration: "none" }}
