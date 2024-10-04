@@ -15,12 +15,15 @@ import java.util.stream.Collectors;
 public class User {
     private Long id;
     private String login;
+    private Set<Role> roles;
     private List<HumanBeing> humanBeingList;
+
 
     public static User toModel(UserEntity userEntity){
         User model = new User();
         model.setId(userEntity.getId());
         model.setLogin(userEntity.getLogin());
+        model.setRoles(userEntity.getRoles());
         model.setHumanBeingList(userEntity.getHumanBeingEntityList().stream().map(HumanBeing::toModel).collect(Collectors.toList()));
         return model;
     }
