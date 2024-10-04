@@ -34,7 +34,6 @@ public class AuthService {
             throw new UserAlreadyExistException("Пользователь с таким логином уже существует");
         }
 
-
         String hashedPassword = PasswordHash384.encryptThisString(authRequest.getPassword());
 
 
@@ -58,7 +57,7 @@ public class AuthService {
         final String refreshToken = jwtProvider.generateRefreshToken(newUser);
         refreshStorage.put(newUser.getLogin(), refreshToken);
 
-        return new JwtResponse(accessToken, refreshToken);
+        return new JwtResponse(accessToken, refreshToken, newUser.getId());
     }
 
     public JwtResponse login(@NonNull JwtRequest authRequest) {
@@ -69,7 +68,7 @@ public class AuthService {
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
             refreshStorage.put(user.getLogin(), refreshToken);
-            return new JwtResponse(accessToken, refreshToken);
+            return new JwtResponse(accessToken, refreshToken,user.getId());
         } else {
             throw new AuthException("Неправильный пароль");
         }
@@ -84,10 +83,10 @@ public class AuthService {
                 final UserEntity user = userService.getByLogin(login)
                         .orElseThrow(() -> new AuthException("Пользователь не найден"));
                 final String accessToken = jwtProvider.generateAccessToken(user);
-                return new JwtResponse(accessToken, null);
+                return new JwtResponse(accessToken, null,user.getId());
             }
         }
-        return new JwtResponse(null, null);
+        return new JwtResponse(null, null,null);
     }
 
     public JwtResponse refresh(@NonNull String refreshToken) {
@@ -101,7 +100,7 @@ public class AuthService {
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String newRefreshToken = jwtProvider.generateRefreshToken(user);
                 refreshStorage.put(user.getLogin(), newRefreshToken);
-                return new JwtResponse(accessToken, newRefreshToken);
+                return new JwtResponse(accessToken, newRefreshToken, user.getId());
             }
         }
         throw new AuthException("Невалидный JWT токен");
