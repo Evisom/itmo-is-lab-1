@@ -32,6 +32,8 @@ public class HumanBeingEntity {
     @JoinColumn(name = "coordinates_id")
     private Coordinates coordinates;
 
+
+
     @NotNull
     @Column(updatable = false)
     private LocalDateTime creationDate;
