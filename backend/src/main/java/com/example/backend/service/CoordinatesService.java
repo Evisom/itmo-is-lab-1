@@ -38,4 +38,12 @@ public class CoordinatesService {
         return coordinates;
 
     }
+
+    public boolean deleteCoordinates(Long id) {
+        if (coordinatesRepo.existsById(id)) {
+            coordinatesRepo.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
