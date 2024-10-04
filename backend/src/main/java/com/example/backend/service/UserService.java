@@ -62,8 +62,8 @@ public class UserService {
     }
 
     public void goToLimbo(Long userId) {
-        Limbo limboEntity = new Limbo(); // Assuming you have a Limbo class
-        limboEntity.setUserid(userId); // Set user or any other fields as needed
+        Limbo limboEntity = new Limbo();
+        limboEntity.setUserid(userId);
         limboRepo.save(limboEntity);
     }
 
