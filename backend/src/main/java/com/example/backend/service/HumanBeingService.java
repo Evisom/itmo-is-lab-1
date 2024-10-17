@@ -107,10 +107,10 @@ public class HumanBeingService {
             predicates.add(cb.equal(humanBeing.get("carId"), carId));
         }
 
-        // Устанавливаем условия фильтрации
+
         query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
 
-        // Выполняем запрос и возвращаем результат
+
         return entityManager.createQuery(query).getResultList().stream().map(HumanBeing::toModel).collect(Collectors.toList());
 
     }
