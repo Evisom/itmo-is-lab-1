@@ -1,12 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.domain.HumanBeing;
 import com.example.backend.entity.Car;
-import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.exception.NoEntityException;
-import com.example.backend.exception.UserNotFoundException;
 import com.example.backend.service.CarService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +11,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cars")
+@RequiredArgsConstructor
 public class CarController {
-    @Autowired
-    private CarService carService;
+
+    private final CarService carService;
 
     @GetMapping
     public ResponseEntity<List<Car>> getAllCars() {

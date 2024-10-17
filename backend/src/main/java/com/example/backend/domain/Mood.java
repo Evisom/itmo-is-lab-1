@@ -4,5 +4,5 @@ public enum Mood {
     SORROW,
     APATHY,
     CALM,
-    FRENZY;
+    FRENZY
 }
