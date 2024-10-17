@@ -4,11 +4,13 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Mood;
 import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.HumanBeingEntity;
+import com.example.backend.exception.NoEntityException;
 import com.example.backend.service.HumanBeingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,10 +54,11 @@ public class HumanBeingController {
     }
 
     @PostMapping
-    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,
-                                           @RequestParam Long userId){
+    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,  @RequestParam Long userId, @RequestHeader("Authorization") String token){
         try {
-            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId));
+            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId,token.substring(7)));
+        }catch (AccessDeniedException e) {
+            return ResponseEntity.status(403).build();
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
@@ -63,16 +66,16 @@ public class HumanBeingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity) {
+    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity, @RequestHeader("Authorization") String token) {
         try {
-            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
+            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity,token.substring(7)));
         }catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id) {
-        if (humanBeingService.deleteHumanBeing(id)) {
+    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id, @RequestHeader("Authorization") String token) throws NoEntityException {
+        if (humanBeingService.deleteHumanBeing(id,token.substring(7))) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

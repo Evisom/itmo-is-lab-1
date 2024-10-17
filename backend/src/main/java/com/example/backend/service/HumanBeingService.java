@@ -21,9 +21,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -31,6 +33,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HumanBeingService {
     private final EntityManager entityManager;
+
+    private final JwtProvider jwtProvider;
+
+
 
 
     private final HumanBeingRepo humanBeingRepo;
@@ -109,10 +115,13 @@ public class HumanBeingService {
             predicates.add(cb.equal(humanBeing.get("carId"), carId));
         }
 
-        if ("asc".equalsIgnoreCase(sortOrder)) {
-            query.orderBy(cb.asc(humanBeing.get(filterField)));
-        } else {
-            query.orderBy(cb.desc(humanBeing.get(filterField)));
+        if (sortOrder!=null) {
+
+            if ("asc".equalsIgnoreCase(sortOrder)) {
+                query.orderBy(cb.asc(humanBeing.get(filterField)));
+            } else {
+                query.orderBy(cb.desc(humanBeing.get(filterField)));
+            }
         }
 
         query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
@@ -123,8 +132,13 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) throws NoEntityException {
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId, String token) throws NoEntityException, AccessDeniedException {
+
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        if (!checkRights(userId,token)){
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
 
         Long carId = human.getCar().getId();
         Car car;
@@ -155,11 +169,19 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
+
+
     @Transactional
-    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException {
+    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails, String token) throws NoEntityException, AccessDeniedException {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
         Coordinates coordinates;
+
+
+        if (!checkRights(humanBeingEntity.getUser().getId(),token)){
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
+
 
         Long carId = humanBeingDetails.getCar().getId();
 
@@ -173,6 +195,7 @@ public class HumanBeingService {
 
 
         Long coorId = humanBeingDetails.getCoordinates().getId();
+
         if (coorId == null) {
             coordinates = coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).orElseThrow(() -> new NoEntityException("no such entity"));
             coordinates.setX(humanBeingDetails.getCoordinates().getX());
@@ -200,8 +223,9 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public boolean deleteHumanBeing(Long id) {
-        if (humanBeingRepo.existsById(id)) {
+    public boolean deleteHumanBeing(Long id, String token) throws NoEntityException {
+
+        if (checkRights(humanBeingRepo.findById(id).orElseThrow().getUser().getId(),token)) {
             humanBeingRepo.deleteById(id);
             return true;
         }
@@ -233,6 +257,14 @@ public class HumanBeingService {
     @Transactional
     public void updateHumansWithoutCars() {
         humanBeingRepo.updateHumansWithoutCars();
+    }
+
+    private boolean checkRights(Long userId, String token) throws NoEntityException {
+        String usernameFromToken = jwtProvider.getAccessClaims(token).getSubject();
+        List<String> roles = jwtProvider.extractRoles(token);
+
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+        return Objects.equals(user.getLogin(), usernameFromToken) || roles.contains("ADMIN");
     }
 
 

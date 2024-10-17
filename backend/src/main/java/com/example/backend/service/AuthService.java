@@ -1,6 +1,5 @@
 package com.example.backend.service;
 
-import com.example.backend.domain.JwtAuthentication;
 import com.example.backend.domain.JwtRequest;
 import com.example.backend.domain.JwtResponse;
 import com.example.backend.domain.Role;
@@ -11,7 +10,6 @@ import com.example.backend.util.PasswordHash384;
 import io.jsonwebtoken.Claims;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
