@@ -50,7 +50,7 @@ public class AuthService {
             roles.add(Role.ADMIN);
             userService.save(newUser);
         } else if (wantBeAdmin) {
-            userService.goToLimbo(newUser.getId());
+            userService.goToLimbo(newUser);
         }
 
         final String accessToken = jwtProvider.generateAccessToken(newUser);
@@ -106,8 +106,6 @@ public class AuthService {
         throw new AuthException("Невалидный JWT токен");
     }
 
-    public JwtAuthentication getAuthInfo() {
-        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
-    }
+
 
 }

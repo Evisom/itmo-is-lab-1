@@ -3,27 +3,26 @@ package com.example.backend.controller;
 import com.example.backend.domain.HumanBeing;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.service.HumanBeingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/humanbeings")
+@RequiredArgsConstructor
 public class HumanBeingController {
 
-    @Autowired
-    private HumanBeingService humanBeingService;
+
+    private final HumanBeingService humanBeingService;
 
     @GetMapping("/{id}")
-    public ResponseEntity getHumanBeing(@PathVariable Long id){
+    public ResponseEntity<HumanBeing> getHumanBeing(@PathVariable Long id){
         try {
             return ResponseEntity.ok(humanBeingService.getHumanBeing(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.badRequest().build();
         }
 
     }
