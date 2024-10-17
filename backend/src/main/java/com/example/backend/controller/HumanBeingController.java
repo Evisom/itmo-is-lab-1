@@ -41,10 +41,12 @@ public class HumanBeingController {
             @RequestParam(required = false) Double impactSpeed,
             @RequestParam(required = false) String soundtrackName,
             @RequestParam(required = false) Double minutesOfWaiting,
-            @RequestParam(required = false) WeaponType weaponType
+            @RequestParam(required = false) WeaponType weaponType,
+            @RequestParam(required = false) String filterField,
+            @RequestParam(required = false) String sortOrder
     ){
             return ResponseEntity.ok(humanBeingService.getFilteredHumans(name,coordinatesId,creationDate,realHero,hasToothpick,carId,
-                    mood,impactSpeed,soundtrackName,minutesOfWaiting,weaponType));
+                    mood,impactSpeed,soundtrackName,minutesOfWaiting,weaponType,filterField,sortOrder));
 
 
     }

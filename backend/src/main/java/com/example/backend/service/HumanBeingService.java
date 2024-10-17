@@ -51,7 +51,9 @@ public class HumanBeingService {
     }
 
     @Transactional(readOnly = true)
-    public List<HumanBeing> getFilteredHumans(String name, Long coordinatesId, LocalDateTime creationDate, Boolean realHero, Boolean hasToothpick, Long carId, Mood mood, Double impactSpeed, String soundtrackName, Double minutesOfWaiting, WeaponType weaponType) {
+    public List<HumanBeing> getFilteredHumans(String name, Long coordinatesId, LocalDateTime creationDate, Boolean realHero,
+                                              Boolean hasToothpick, Long carId, Mood mood, Double impactSpeed, String soundtrackName,
+                                              Double minutesOfWaiting, WeaponType weaponType, String filterField, String sortOrder) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HumanBeingEntity> query = cb.createQuery(HumanBeingEntity.class);
         Root<HumanBeingEntity> humanBeing = query.from(HumanBeingEntity.class);
@@ -107,6 +109,11 @@ public class HumanBeingService {
             predicates.add(cb.equal(humanBeing.get("carId"), carId));
         }
 
+        if ("asc".equalsIgnoreCase(sortOrder)) {
+            query.orderBy(cb.asc(humanBeing.get(filterField)));
+        } else {
+            query.orderBy(cb.desc(humanBeing.get(filterField)));
+        }
 
         query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
 
