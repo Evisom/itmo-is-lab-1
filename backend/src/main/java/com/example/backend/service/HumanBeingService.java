@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
 import com.example.backend.domain.HumanBeing;
+import com.example.backend.domain.Mood;
+import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.Car;
 import com.example.backend.entity.Coordinates;
 import com.example.backend.entity.HumanBeingEntity;
@@ -10,10 +12,17 @@ import com.example.backend.repository.CarRepo;
 import com.example.backend.repository.CoordinatesRepo;
 import com.example.backend.repository.HumanBeingRepo;
 import com.example.backend.repository.UserRepo;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class HumanBeingService {
+    private final EntityManager entityManager;
 
 
     private final HumanBeingRepo humanBeingRepo;
@@ -33,16 +43,76 @@ public class HumanBeingService {
 
 
     private final CoordinatesRepo coordinatesRepo;
-    @Transactional(readOnly = true)
 
+    @Transactional(readOnly = true)
     public HumanBeing getHumanBeing(Long id) throws NoEntityException {
         HumanBeingEntity humanBeing = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         return HumanBeing.toModel(humanBeing);
     }
 
     @Transactional(readOnly = true)
-    public List<HumanBeing> getAllHumanBeing() {
-        return humanBeingRepo.findAll().stream().map(HumanBeing::toModel).collect(Collectors.toList());
+    public List<HumanBeing> getFilteredHumans(String name, Long coordinatesId, LocalDateTime creationDate, Boolean realHero, Boolean hasToothpick, Long carId, Mood mood, Double impactSpeed, String soundtrackName, Double minutesOfWaiting, WeaponType weaponType) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HumanBeingEntity> query = cb.createQuery(HumanBeingEntity.class);
+        Root<HumanBeingEntity> humanBeing = query.from(HumanBeingEntity.class);
+
+
+        List<Predicate> predicates = new ArrayList<>();
+
+
+        if (name != null) {
+            predicates.add(cb.equal(humanBeing.get("name"), name));
+        }
+        if (coordinatesId != null) {
+            predicates.add(cb.equal(humanBeing.get("coordinatesId"), coordinatesId));
+        }
+
+        if (realHero != null) {
+            predicates.add(cb.equal(humanBeing.get("realHero"), realHero));
+        }
+
+
+        if (impactSpeed != null) {
+            predicates.add(cb.equal(humanBeing.get("impactSpeed"), impactSpeed));
+        }
+
+
+        if (weaponType != null) {
+            predicates.add(cb.equal(humanBeing.get("weaponType"), weaponType));
+        }
+        if (creationDate != null) {
+            predicates.add(cb.equal(humanBeing.get("creationDate"), creationDate));
+        }
+
+
+        if (hasToothpick != null) {
+            predicates.add(cb.equal(humanBeing.get("hasToothpick"), hasToothpick));
+        }
+
+
+        if (soundtrackName != null) {
+            predicates.add(cb.equal(humanBeing.get("soundtrackName"), soundtrackName));
+        }
+        if (minutesOfWaiting != null) {
+            predicates.add(cb.equal(humanBeing.get("minutesOfWaiting"), minutesOfWaiting));
+        }
+
+
+        if (mood != null) {
+            predicates.add(cb.equal(humanBeing.get("mood"), mood));
+        }
+
+
+        if (carId != null) {
+            predicates.add(cb.equal(humanBeing.get("carId"), carId));
+        }
+
+        // Устанавливаем условия фильтрации
+        query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
+
+        // Выполняем запрос и возвращаем результат
+        return entityManager.createQuery(query).getResultList().stream().map(HumanBeing::toModel).collect(Collectors.toList());
+
     }
 
     @Transactional
@@ -82,7 +152,7 @@ public class HumanBeingService {
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
-        Coordinates coordinates ;
+        Coordinates coordinates;
 
         Long carId = humanBeingDetails.getCar().getId();
 
@@ -97,7 +167,7 @@ public class HumanBeingService {
 
         Long coorId = humanBeingDetails.getCoordinates().getId();
         if (coorId == null) {
-            coordinates =  coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).orElseThrow(() -> new NoEntityException("no such entity"));
+            coordinates = coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).orElseThrow(() -> new NoEntityException("no such entity"));
             coordinates.setX(humanBeingDetails.getCoordinates().getX());
             coordinates.setY(humanBeingDetails.getCoordinates().getY());
             coordinatesRepo.save(coordinates);
@@ -105,8 +175,6 @@ public class HumanBeingService {
             humanBeingEntity.setCoordinates(coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity")));
 
         }
-
-
 
 
         humanBeingEntity.setName(humanBeingDetails.getName());
@@ -119,13 +187,12 @@ public class HumanBeingService {
         humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
 
 
-
         humanBeingRepo.save(humanBeingEntity);
 
         return HumanBeing.toModel(humanBeingEntity);
     }
 
-@Transactional
+    @Transactional
     public boolean deleteHumanBeing(Long id) {
         if (humanBeingRepo.existsById(id)) {
             humanBeingRepo.deleteById(id);
@@ -139,6 +206,7 @@ public class HumanBeingService {
     public int getHumanCountBySoundtrackName(String soundtrackName) {
         return humanBeingRepo.getHumanCountBySoundtrackName(soundtrackName);
     }
+
     @Transactional(readOnly = true)
 
     public int getHumanCountByWeaponType(String weaponType) {
@@ -159,4 +227,6 @@ public class HumanBeingService {
     public void updateHumansWithoutCars() {
         humanBeingRepo.updateHumansWithoutCars();
     }
+
+
 }

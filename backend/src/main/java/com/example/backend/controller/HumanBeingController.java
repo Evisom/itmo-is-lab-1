@@ -1,12 +1,15 @@
 package com.example.backend.controller;
 
 import com.example.backend.domain.HumanBeing;
+import com.example.backend.domain.Mood;
+import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.service.HumanBeingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,8 +30,21 @@ public class HumanBeingController {
 
     }
     @GetMapping
-    public ResponseEntity<List<HumanBeing>> getAllHumanBeing(){
-            return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
+    public ResponseEntity<List<HumanBeing>> getFilteredHumans(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long coordinatesId,
+            @RequestParam(required = false) LocalDateTime creationDate,
+            @RequestParam(required = false) Boolean realHero,
+            @RequestParam(required = false) Boolean hasToothpick,
+            @RequestParam(required = false) Long carId,
+            @RequestParam(required = false) Mood mood,
+            @RequestParam(required = false) Double impactSpeed,
+            @RequestParam(required = false) String soundtrackName,
+            @RequestParam(required = false) Double minutesOfWaiting,
+            @RequestParam(required = false) WeaponType weaponType
+    ){
+            return ResponseEntity.ok(humanBeingService.getFilteredHumans(name,coordinatesId,creationDate,realHero,hasToothpick,carId,
+                    mood,impactSpeed,soundtrackName,minutesOfWaiting,weaponType));
 
 
     }
