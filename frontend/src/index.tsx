@@ -21,6 +21,8 @@ import { Operations } from "./routes/Operations";
 import { Coordinates } from "./routes/Coordinates";
 import { Car } from "./routes/Car";
 
+export const BASEURL = "/~s369074";
+// export const BASEURL = "";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -35,43 +37,43 @@ const root = ReactDOM.createRoot(
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: BASEURL + "/",
     element: <App />,
   },
   {
-    path: "/login",
+    path: BASEURL + "/login",
     element: <Login />,
   },
   {
-    path: "/register",
+    path: BASEURL + "/register",
     element: <Register />,
   },
   {
-    path: "/new",
+    path: BASEURL + "/new",
     element: <ObjectPage type={"new"} />,
   },
   {
-    path: "/edit/:objectId",
+    path: BASEURL + "/edit/:objectId",
     element: <ObjectPage type={"edit"} />,
   },
   {
-    path: "/view/:objectId",
+    path: BASEURL + "/view/:objectId",
     element: <ObjectPage type={"view"} />,
   },
   {
-    path: "/admin",
+    path: BASEURL + "/admin",
     element: <Admin />,
   },
   {
-    path: "/operations",
+    path: BASEURL + "/operations",
     element: <Operations />,
   },
   {
-    path: "/coordinates",
+    path: BASEURL + "/coordinates",
     element: <Coordinates />,
   },
   {
-    path: "/car",
+    path: BASEURL + "/car",
     element: <Car />,
   },
 ]);

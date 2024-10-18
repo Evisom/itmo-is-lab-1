@@ -4,6 +4,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { BASEURL } from "..";
 
 // Определим интерфейс для пропсов компонента Header
 interface HeaderProps {
@@ -24,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Typography
           variant="h6"
           component="a"
-          href="/"
+          href={BASEURL + "/"}
           sx={{ flexGrow: 1 }}
           style={{ color: "white", textDecoration: "none" }}
         >
@@ -41,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
             color="inherit"
             variant="outlined"
             onClick={() => {
-              navigate("/new");
+              navigate(BASEURL + "/new");
             }}
           >
             Создать
@@ -50,21 +51,21 @@ export const Header: React.FC<HeaderProps> = ({
           <Typography
             style={{ color: "white", textDecoration: "none" }}
             component={"a"}
-            href="/operations"
+            href={BASEURL + "/operations"}
           >
             ОПЕРАЦИИ
           </Typography>
           <Typography
             style={{ color: "white", textDecoration: "none" }}
             component={"a"}
-            href="/coordinates"
+            href={BASEURL + "/coordinates"}
           >
             КООРДИНАТЫ
           </Typography>
           <Typography
             style={{ color: "white", textDecoration: "none" }}
             component={"a"}
-            href="/car"
+            href={BASEURL + "/car"}
           >
             МАШИНЫ
           </Typography>
@@ -77,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
               transition: "opacity 0.1s",
             }}
             component={"a"}
-            href="/admin"
+            href={BASEURL + "/admin"}
           >
             АДМИНКА
           </Typography>

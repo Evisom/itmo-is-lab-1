@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Register.scss";
 import { setUsername, setToken, setId } from "../../store/userSlice";
+import { BASEURL } from "./../../index";
 export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -71,7 +72,7 @@ export const Register = () => {
           localStorage.setItem("id", response.userId);
           localStorage.setItem("username", username);
           localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
-          navigate("/");
+          navigate(BASEURL + "/");
         })
         .catch(() => {
           setUsernameErrorText("Имя занято");
@@ -190,7 +191,11 @@ export const Register = () => {
         >
           создать аккаунт
         </Button>
-        <Link style={{ textAlign: "center" }} underline="hover" href="/login">
+        <Link
+          style={{ textAlign: "center" }}
+          underline="hover"
+          href={BASEURL + "/login"}
+        >
           Уже есть аккаунт
         </Link>
       </div>

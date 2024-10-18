@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Header } from "./../../components/Header";
+import { BASEURL } from "../..";
 
 export const Admin = () => {
   const dispatch = useDispatch();
@@ -42,7 +43,7 @@ export const Admin = () => {
       .then((response) => {
         setIsAdmin(response.roles.includes("ADMIN"));
         if (!response.roles.includes("ADMIN")) {
-          navigate("/");
+          navigate(BASEURL + "/");
         }
       })
       .catch(() => {
@@ -95,7 +96,7 @@ export const Admin = () => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate("/");
+          navigate(BASEURL + "/");
         }}
       />
       <Container
