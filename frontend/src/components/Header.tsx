@@ -5,8 +5,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { BASEURL } from "..";
+import useSWR from "swr";
+import "./Header.css";
 
-// Определим интерфейс для пропсов компонента Header
 interface HeaderProps {
   isAdmin: boolean;
   username: string;
@@ -19,6 +20,9 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const navigate = useNavigate();
+
+  const { data: userData } = useSWR(BASEURL + "/api/user", fetcher);
+
   return (
     <AppBar position="sticky">
       <Toolbar>
@@ -26,70 +30,48 @@ export const Header: React.FC<HeaderProps> = ({
           variant="h6"
           component="a"
           href={BASEURL + "/"}
-          sx={{ flexGrow: 1 }}
-          style={{ color: "white", textDecoration: "none" }}
+          className="header-title"
         >
           IS-LAB-1
         </Typography>
-        <div
-          style={{
-            display: "flex",
-            gap: 24,
-            alignItems: "center",
-          }}
-        >
+        <div className="header-actions">
+          {isAdmin && (
+            <Typography component="a" href={BASEURL + "/admin"}>
+              АДМИНКА
+            </Typography>
+          )}
           <Button
             color="inherit"
             variant="outlined"
-            onClick={() => {
-              navigate(BASEURL + "/new");
-            }}
+            onClick={() => navigate(BASEURL + "/new")}
           >
             Создать
             <AddIcon />
           </Button>
-          <Typography
-            style={{ color: "white", textDecoration: "none" }}
-            component={"a"}
-            href={BASEURL + "/operations"}
-          >
+          <Typography component="a" href={BASEURL + "/operations"}>
             ОПЕРАЦИИ
           </Typography>
-          <Typography
-            style={{ color: "white", textDecoration: "none" }}
-            component={"a"}
-            href={BASEURL + "/coordinates"}
-          >
+          <Typography component="a" href={BASEURL + "/coordinates"}>
             КООРДИНАТЫ
           </Typography>
-          <Typography
-            style={{ color: "white", textDecoration: "none" }}
-            component={"a"}
-            href={BASEURL + "/car"}
-          >
+          <Typography component="a" href={BASEURL + "/car"}>
             МАШИНЫ
           </Typography>
 
-          <Typography
-            style={{
-              color: "white",
-              textDecoration: "none",
-              opacity: isAdmin ? 1 : 0,
-              transition: "opacity 0.1s",
-            }}
-            component={"a"}
-            href={BASEURL + "/admin"}
-          >
-            АДМИНКА
-          </Typography>
-
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="header-user">
             <AccountCircleIcon />
-            <Typography>{username}</Typography>
+            <Typography>{username || userData?.username}</Typography>
           </div>
-          <LogoutIcon onClick={onLogout} />
+          <LogoutIcon
+            onClick={() => {
+              navigate(BASEURL + "/login");
+            }}
+          />
         </div>
       </Toolbar>
     </AppBar>
   );
 };
+
+// Использование SWR для получения данных
+const fetcher = (url: string) => fetch(url).then((res) => res.json());

@@ -12,7 +12,7 @@ import {
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
-import "./Login.scss";
+import "./Login.css"; // Changed to CSS for consistency
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setUsername, setToken, setId } from "../../store/userSlice";
@@ -64,10 +64,9 @@ export const Login = () => {
         dispatch(setId(response.userId));
         localStorage.setItem("id", response.userId);
         localStorage.setItem("username", username);
-        localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
+        localStorage.setItem("token", response.accessToken); // Save to local storage on successful login
         navigate(BASEURL + "/");
       })
-      .then((response) => {})
       .catch(() => {
         setPasswordErrorText("Неправильный пароль");
       });
@@ -82,7 +81,7 @@ export const Login = () => {
         <TextField
           error={!!usernameErrorText}
           value={username}
-          id="outlined-basic"
+          // id="outlined-basic"
           label="Имя пользователя"
           variant="outlined"
           helperText={usernameErrorText}
@@ -127,7 +126,7 @@ export const Login = () => {
           Войти
         </Button>
         <Link
-          style={{ textAlign: "center" }}
+          className="login-link"
           underline="hover"
           href={BASEURL + "/register"}
         >

@@ -1,0 +1,14 @@
+.car-container {
+  margin-top: 24px;
+}
+
+.car-form {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.car-table {
+  height: 400px;
+  width: 100%;
+}

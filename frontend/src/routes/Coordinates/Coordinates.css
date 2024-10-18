@@ -1,0 +1,14 @@
+.coordinates-container {
+  margin-top: 24px;
+}
+
+.coordinates-form {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.coordinates-table {
+  height: 400px;
+  width: 100%;
+}

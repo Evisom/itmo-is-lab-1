@@ -16,44 +16,47 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import "./Register.scss";
+import "./Register.scss"; // Renamed to .css for consistency
 import { setUsername, setToken, setId } from "../../store/userSlice";
 import { BASEURL } from "./../../index";
+
 export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
 
-  const [username, setInputUsername] = useState("");
-  const [usernameErrorText, setUsernameErrorText] = useState("");
+  const [username, setUsernameInput] = useState("");
+  const [usernameError, setUsernameError] = useState("");
 
-  const [password, setPassword] = useState("");
-  const [passwordErrorText, setPasswordErrorText] = useState("");
+  const [password, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [confirmPassword, setConfirmPasswordInput] = useState("");
 
-  const [wantToBeAdmin, setWantToBeAdmin] = useState(false);
+  const [isAdminRequest, setIsAdminRequest] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleRegister = () => {
-    let valid = true;
-    if (!isPasswordMatch()) {
-      setPasswordErrorText("Пароли не совпадают");
-      valid = false;
+    let isValid = true;
+
+    if (!isPasswordsMatch()) {
+      setPasswordError("Пароли не совпадают");
+      isValid = false;
     }
+
     if (password.length < 4) {
-      setPasswordErrorText("Пароль слишком короткий");
-      valid = false;
+      setPasswordError("Пароль слишком короткий");
+      isValid = false;
     }
 
     if (username.length < 4) {
-      setUsernameErrorText("Имя пользователя короткое");
-      valid = false;
+      setUsernameError("Имя пользователя слишком короткое");
+      isValid = false;
     }
 
-    if (valid) {
-      fetch("/api/auth/registration?wantBeAdmin=" + wantToBeAdmin, {
+    if (isValid) {
+      fetch(`/api/auth/registration?wantBeAdmin=${isAdminRequest}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -65,42 +68,30 @@ export const Register = () => {
         }),
       })
         .then((response) => response.json())
-        .then((response) => {
+        .then((data) => {
           dispatch(setUsername(username));
-          dispatch(setToken(response.accessToken));
-          dispatch(setId(response.userId));
-          localStorage.setItem("id", response.userId);
+          dispatch(setToken(data.accessToken));
+          dispatch(setId(data.userId));
+          localStorage.setItem("id", data.userId);
           localStorage.setItem("username", username);
-          localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
+          localStorage.setItem("token", data.accessToken);
           navigate(BASEURL + "/");
         })
         .catch(() => {
-          setUsernameErrorText("Имя занято");
+          setUsernameError("Имя пользователя занято");
         });
     }
   };
 
-  const isPasswordMatch = () => {
-    return password === passwordConfirmation;
-  };
-
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
+  const isPasswordsMatch = () => {
+    return password === confirmPassword;
   };
 
   useEffect(() => {
-    if (passwordErrorText && isPasswordMatch()) {
-      setPasswordErrorText("");
+    if (passwordError && isPasswordsMatch()) {
+      setPasswordError("");
     }
-  }, [password, passwordConfirmation]);
+  }, [password, confirmPassword]);
 
   return (
     <div className="register-wrapper">
@@ -109,34 +100,31 @@ export const Register = () => {
           Регистрация
         </Typography>
         <TextField
-          error={!!usernameErrorText}
-          id="outlined-basic"
+          error={!!usernameError}
           label="Имя пользователя"
           variant="outlined"
           value={username}
           onChange={(e) => {
-            setInputUsername(e.target.value);
-            setUsernameErrorText("");
+            setUsernameInput(e.target.value);
+            setUsernameError("");
           }}
-          helperText={usernameErrorText}
+          helperText={usernameError}
         />
         <FormControl variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">Пароль</InputLabel>
+          <InputLabel htmlFor="password">Пароль</InputLabel>
           <OutlinedInput
-            error={!!passwordErrorText}
-            id="outlined-adornment-password"
+            error={!!passwordError}
+            id="password"
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value);
+              setPasswordInput(e.target.value);
             }}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  onMouseUp={handleMouseUpPassword}
                   edge="end"
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -147,24 +135,18 @@ export const Register = () => {
           />
         </FormControl>
         <FormControl variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">
-            Повторите пароль
-          </InputLabel>
+          <InputLabel htmlFor="confirm-password">Повторите пароль</InputLabel>
           <OutlinedInput
-            error={!!passwordErrorText}
-            id="outlined-adornment-password"
+            error={!!passwordError}
+            id="confirm-password"
             type={showPassword ? "text" : "password"}
-            value={passwordConfirmation}
-            onChange={(e) => {
-              setPasswordConfirmation(e.target.value);
-            }}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPasswordInput(e.target.value)}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  onMouseUp={handleMouseUpPassword}
                   edge="end"
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -174,25 +156,25 @@ export const Register = () => {
             label="Повторите пароль"
           />
         </FormControl>
-        <InputLabel error>{passwordErrorText}</InputLabel>
+        <InputLabel error>{passwordError}</InputLabel>
         <FormControlLabel
           control={
             <Checkbox
-              value={wantToBeAdmin}
-              onChange={(e) => setWantToBeAdmin(!wantToBeAdmin)}
+              checked={isAdminRequest}
+              onChange={() => setIsAdminRequest(!isAdminRequest)}
             />
           }
           label="Хочу стать админом"
         />
         <Button
           variant="outlined"
-          disabled={!(password && passwordConfirmation && username)}
+          disabled={!(password && confirmPassword && username)}
           onClick={handleRegister}
         >
-          создать аккаунт
+          Создать аккаунт
         </Button>
         <Link
-          style={{ textAlign: "center" }}
+          className="register-link"
           underline="hover"
           href={BASEURL + "/login"}
         >

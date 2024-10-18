@@ -2,28 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./../../store/store";
-import { setUsername, setToken } from "./../../store/userSlice";
-import { useNavigate, useParams } from "react-router-dom";
-import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { setToken } from "./../../store/userSlice";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Checkbox,
   Container,
-  FormControl,
-  FormGroup,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
-  Typography,
-  FormControlLabel,
-  ButtonGroup,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Chip,
   Paper,
   Stack,
   Table,
@@ -48,16 +35,22 @@ export const Operations = () => {
     useSelector((state: RootState) => state.user.token) ||
     localStorage.getItem("token");
 
-  const id = Number(
+  const userId = Number(
     useSelector((state: RootState) => state.user.id) ||
       localStorage.getItem("id")
   );
 
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
+  const [soundtrackName, setSoundtrackName] = useState("");
+  const [soundtrackNameCount, setSoundtrackNameCount] = useState("результат");
+  const [weaponType, setWeaponType] = useState("");
+  const [weaponTypeCount, setWeaponTypeCount] = useState("результат");
+  const [soundtrackNameList, setSoundtrackNameList] = useState([]);
   const [limboList, setLimboList] = useState();
 
+  // Fetch admin status
   const fetchAdminStatus = () => {
-    fetch(`/users/${id}`, {
+    fetch(`/users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => response.json())
@@ -68,17 +61,13 @@ export const Operations = () => {
         }
       })
       .catch(() => {
-        console.log("ошибка проверки админа");
+        console.log("Ошибка проверки админа");
       });
   };
-  fetchAdminStatus();
 
-  const [action1, setAction1] = useState("");
-  const [action1Result, setAction1Result] = useState("результат");
-  const [action2, setAction2] = useState("");
-  const [action2Result, setAction2Result] = useState("результат");
-  const [action3, setAction3] = useState("");
-  const [action3Result, setAction3Result] = useState([]);
+  useEffect(() => {
+    fetchAdminStatus();
+  }, [userId, token]);
 
   return (
     <div>
@@ -99,6 +88,7 @@ export const Operations = () => {
           flexDirection: "column",
         }}
       >
+        {/* Soundtrack Name Count */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -111,24 +101,22 @@ export const Operations = () => {
           <AccordionDetails>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                value={action1}
-                onChange={(e) => {
-                  setAction1(e.target.value);
-                }}
+                value={soundtrackName}
+                onChange={(e) => setSoundtrackName(e.target.value)}
                 label="soundTrackName"
                 size="small"
               />
               <Button
                 onClick={() => {
                   fetch(
-                    `/humanbeings/count/soundtrackName?soundtrackName=${action1}`,
+                    `/humanbeings/count/soundtrackName?soundtrackName=${soundtrackName}`,
                     {
                       headers: { Authorization: `Bearer ${token}` },
                     }
                   )
                     .then((response) => response.text())
                     .then((response) => {
-                      setAction1Result(response);
+                      setSoundtrackNameCount(response);
                     });
                 }}
                 variant="outlined"
@@ -144,11 +132,13 @@ export const Operations = () => {
                 }}
                 elevation={8}
               >
-                {action1Result}
+                {soundtrackNameCount}
               </Paper>
             </Stack>
           </AccordionDetails>
         </Accordion>
+
+        {/* Weapon Type Count */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -162,20 +152,21 @@ export const Operations = () => {
             <Stack direction={"row"} spacing={2}>
               <TextField
                 label="weaponType"
-                value={action2}
-                onChange={(e) => {
-                  setAction2(e.target.value);
-                }}
+                value={weaponType}
+                onChange={(e) => setWeaponType(e.target.value)}
                 size="small"
               />
               <Button
                 onClick={() => {
-                  fetch(`/humanbeings/count/weaponType?weaponType=${action2}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  })
+                  fetch(
+                    `/humanbeings/count/weaponType?weaponType=${weaponType}`,
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  )
                     .then((response) => response.text())
                     .then((response) => {
-                      setAction2Result(response);
+                      setWeaponTypeCount(response);
                     });
                 }}
                 variant="outlined"
@@ -191,16 +182,18 @@ export const Operations = () => {
                 }}
                 elevation={8}
               >
-                {action2Result}
+                {weaponTypeCount}
               </Paper>
             </Stack>
           </AccordionDetails>
         </Accordion>
+
+        {/* Soundtrack Name List */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
+            aria-controls="panel3-content"
+            id="panel3-header"
           >
             Вернуть массив объектов, значение поля soundtrackName которых больше
             заданного.
@@ -208,24 +201,22 @@ export const Operations = () => {
           <AccordionDetails>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                value={action3}
-                onChange={(e) => {
-                  setAction3(e.target.value);
-                }}
+                value={soundtrackName}
+                onChange={(e) => setSoundtrackName(e.target.value)}
                 label="soundTrackName"
                 size="small"
               />
               <Button
                 onClick={() => {
                   fetch(
-                    `/humanbeings/soundtrackName?soundtrackName=${action2}`,
+                    `/humanbeings/soundtrackName?soundtrackName=${soundtrackName}`,
                     {
                       headers: { Authorization: `Bearer ${token}` },
                     }
                   )
                     .then((response) => response.json())
                     .then((response) => {
-                      setAction3Result(response);
+                      setSoundtrackNameList(response);
                     })
                     .catch((error) => console.log(error));
                 }}
@@ -234,7 +225,7 @@ export const Operations = () => {
                 запустить
               </Button>
             </Stack>
-            {action3Result.length > 0 && (
+            {soundtrackNameList.length > 0 && (
               <TableContainer component={Paper} style={{ marginTop: 24 }}>
                 <Table
                   sx={{ minWidth: 650 }}
@@ -249,7 +240,7 @@ export const Operations = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {action3Result.map((row) => (
+                    {soundtrackNameList.map((row) => (
                       <TableRow
                         key={row.name}
                         sx={{
@@ -271,11 +262,13 @@ export const Operations = () => {
             )}
           </AccordionDetails>
         </Accordion>
+
+        {/* Delete heroes without toothpicks */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
+            aria-controls="panel4-content"
+            id="panel4-header"
           >
             Удалить всех героев без зубочисток.
           </AccordionSummary>
@@ -293,11 +286,13 @@ export const Operations = () => {
             </Button>
           </AccordionDetails>
         </Accordion>
+
+        {/* Update heroes without cars */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
+            aria-controls="panel5-content"
+            id="panel5-header"
           >
             Пересадить всех героев, не имеющих автомобиля на красные "Lada
             Kalina".

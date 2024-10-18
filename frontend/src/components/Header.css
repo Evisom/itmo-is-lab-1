@@ -1,0 +1,27 @@
+.header-title {
+  flex-grow: 1;
+  color: white;
+  text-decoration: none;
+}
+
+.header-actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.header-actions a {
+  color: white;
+  text-decoration: none;
+}
+
+.header-user {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-admin {
+  opacity: 1;
+  transition: opacity 0.1s;
+}

@@ -1,0 +1,17 @@
+.admin-container {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-alert {
+  position: relative;
+  padding: 20px;
+}
+
+.admin-button-group {
+  position: absolute;
+  right: 16px;
+  top: 20px;
+}

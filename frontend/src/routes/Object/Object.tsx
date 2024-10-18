@@ -1,8 +1,8 @@
 // @ts-nocheck
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "./../../store/store";
-import { setUsername, setToken } from "./../../store/userSlice";
+import { RootState } from "../../store/store";
+import { setToken } from "../../store/userSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
@@ -17,11 +17,11 @@ import {
   Typography,
   FormControlLabel,
 } from "@mui/material";
-import { Header } from "./../../components/Header";
-import "./Object.scss";
-import { BASEURL } from "./../../index";
+import { Header } from "../../components/Header";
+import "./Object.scss"; // Renamed to css
 
-// Mood and WeaponType options
+import { BASEURL } from "../../index";
+
 const moods = ["SORROW", "APATHY", "CALM", "FRENZY"];
 const weaponTypes = ["SHOTGUN", "RIFLE", "BAT"];
 
@@ -62,7 +62,6 @@ export const ObjectPage = ({ type }) => {
     weaponType: "SHOTGUN",
   });
 
-  // Функция для загрузки статуса администратора
   useEffect(() => {
     const fetchAdminStatus = () => {
       fetch(`/users/${id}`, {
@@ -76,11 +75,9 @@ export const ObjectPage = ({ type }) => {
           console.log("Ошибка проверки админа");
         });
     };
-
     fetchAdminStatus();
   }, [id, token]);
 
-  // Функция для загрузки данных объекта с сервера
   useEffect(() => {
     if (objectId && type !== "new") {
       fetch(`/humanbeings/${objectId}`, {
@@ -119,7 +116,7 @@ export const ObjectPage = ({ type }) => {
         name === "minutesOfWaiting" ||
         name === "impactSpeed" ||
         name.endsWith("Id")
-          ? Number(value) // Приведение к числу для ID и числовых полей
+          ? Number(value)
           : value,
     }));
   }, []);
@@ -137,12 +134,12 @@ export const ObjectPage = ({ type }) => {
   const handleCoordinatesChange = useCallback((e) => {
     const { name, value } = e.target;
     const numValue = Number(value);
-    if (name === "y" && numValue < -927) return; // Ограничение для Y
+    if (name === "y" && numValue < -927) return;
     setHumanBeing((prev) => ({
       ...prev,
       coordinates: {
         ...prev.coordinates,
-        [name]: numValue, // Приведение к числу для координат x и y
+        [name]: numValue,
       },
     }));
   }, []);
@@ -209,7 +206,7 @@ export const ObjectPage = ({ type }) => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate(BASEURL + "/");
+          navigate(BASEURL + "/login");
         }}
       />
       <Container maxWidth="xxl">
@@ -264,7 +261,6 @@ export const ObjectPage = ({ type }) => {
                   required
                 />
 
-                {/* Coordinates */}
                 <FormControl>
                   <InputLabel>Координаты</InputLabel>
                   <Select
@@ -313,7 +309,6 @@ export const ObjectPage = ({ type }) => {
                   />
                 )}
 
-                {/* Car */}
                 <FormControl>
                   <InputLabel>Машина</InputLabel>
                   <Select
@@ -414,7 +409,6 @@ export const ObjectPage = ({ type }) => {
                   </Select>
                 </FormControl>
 
-                {/* Чекбоксы Real Hero и Toothpick */}
                 <FormControlLabel
                   control={
                     <Checkbox

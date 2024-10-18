@@ -1,8 +1,8 @@
 // @ts-nocheck
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "./../../store/store";
-import { setUsername, setToken } from "./../../store/userSlice";
+import { RootState } from "../../store/store";
+import { setUsername, setToken } from "../../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
@@ -19,8 +19,15 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { Header } from "./../../components/Header";
+import { Header } from "../../components/Header";
+import useSWR from "swr";
 import { BASEURL } from "../..";
+import "./Car.css";
+
+const fetcher = (url: string, token: string) =>
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) =>
+    res.json()
+  );
 
 export const Car = () => {
   const dispatch = useDispatch();
@@ -38,135 +45,78 @@ export const Car = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
-  const [cars, setCars] = useState([]);
   const [cool, setCool] = useState(false);
-  const [editData, setEditData] = useState(null); // State for edit mode
-  const [isEditOpen, setIsEditOpen] = useState(false); // Dialog open state
+  const [editData, setEditData] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // Fetch admin status
-  const fetchAdminStatus = () => {
-    fetch(`/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setIsAdmin(response.roles.includes("ADMIN"));
-        if (!response.roles.includes("ADMIN")) {
-          navigate(BASEURL + "/");
-        }
-      })
-      .catch(() => {
-        console.log("ошибка проверки админа");
-      });
-  };
+  // SWR for admin status
+  const { data: adminData } = useSWR(`/users/${id}`, (url) =>
+    fetcher(url, token)
+  );
 
-  useEffect(() => {
-    fetchAdminStatus();
-  }, []);
+  // SWR for fetching cars
+  const { data: cars, mutate: mutateCars } = useSWR(
+    "/cars",
+    (url) => fetcher(url, token),
+    { revalidateOnFocus: false }
+  );
 
-  // Fetch cars
-  const fetchCars = () => {
-    fetch("/cars", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((data) => setCars(data))
-      .catch(() => {
-        console.log("Ошибка загрузки машин");
-      });
-  };
-
-  useEffect(() => {
-    fetchCars();
-  }, []);
-
-  // Handle input changes for creating new car
   const handleCoolChange = (event) => {
     setCool(event.target.checked);
   };
 
-  // Handle create car
-  const handleCreateCar = () => {
-    const newCar = {
-      cool: cool,
-    };
+  const handleCreateCar = async () => {
+    const newCar = { cool: cool };
 
-    fetch("/cars", {
+    await fetch("/cars", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(newCar),
-    })
-      .then((response) => response.json())
-      .then(() => {
-        setCool(false);
-        fetchCars(); // Update the table after creating new car
-      })
-      .catch(() => {
-        console.log("Ошибка создания машины");
-      });
+    });
+    setCool(false);
+    mutateCars(); // Refresh the cars after creating a new one
   };
 
-  // Handle edit dialog opening
   const handleOpenEditDialog = (row) => {
-    setEditData(row); // Set data for editing
-    setIsEditOpen(true); // Open the dialog
+    setEditData(row);
+    setIsEditOpen(true);
   };
 
-  // Handle edit input changes
   const handleEditCoolChange = (event) => {
     setEditData((prev) => ({ ...prev, cool: event.target.checked }));
   };
 
-  // Handle saving edited car
-  const handleSaveEdit = () => {
-    const updatedCar = {
-      id: editData.id,
-      cool: editData.cool,
-    };
+  const handleSaveEdit = async () => {
+    const updatedCar = { id: editData.id, cool: editData.cool };
 
-    fetch(`/cars/${editData.id}`, {
+    await fetch(`/cars/${editData.id}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(updatedCar),
-    })
-      .then(() => {
-        setIsEditOpen(false); // Close the dialog
-        fetchCars(); // Refresh the table
-      })
-      .catch(() => {
-        console.log("Ошибка обновления машины");
-      });
+    });
+    setIsEditOpen(false);
+    mutateCars(); // Refresh the cars after editing
   };
 
-  // Handle delete car
-  const handleDeleteCar = (id) => {
-    fetch(`/cars/${id}`, {
+  const handleDeleteCar = async (id) => {
+    const response = await fetch(`/cars/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => {
-        if (response.status !== 204) {
-          alert(
-            "Объект не может быть удален так как с ним связаны другие объекты"
-          );
-        }
-        fetchCars(); // Update the table after deletion
-      })
-      .catch(() => {
-        alert(
-          "Объект не может быть удален так как с ним связаны другие объекты"
-        );
-      });
+    });
+
+    if (response.status !== 204) {
+      alert("Объект не может быть удален так как с ним связаны другие объекты");
+    } else {
+      mutateCars(); // Update the table after deletion
+    }
   };
 
-  // Define columns for the DataGrid
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.5 },
     {
@@ -195,7 +145,7 @@ export const Car = () => {
   return (
     <div>
       <Header
-        isAdmin={isAdmin}
+        isAdmin={adminData?.roles.includes("ADMIN")}
         username={username}
         onLogout={() => {
           localStorage.clear();
@@ -203,9 +153,8 @@ export const Car = () => {
           navigate(BASEURL + "/");
         }}
       />
-      <Container maxWidth="xxl" style={{ marginTop: 24 }}>
-        {/* Form for creating car */}
-        <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+      <Container maxWidth="xxl" className="car-container">
+        <div className="car-form">
           <FormControlLabel
             control={<Checkbox checked={cool} onChange={handleCoolChange} />}
             label="Крутая машина?"
@@ -215,12 +164,14 @@ export const Car = () => {
           </Button>
         </div>
 
-        {/* Table with cars */}
-        <div style={{ height: 400, width: "100%" }}>
-          <DataGrid rows={cars} columns={columns} getRowId={(row) => row.id} />
+        <div className="car-table">
+          <DataGrid
+            rows={cars || []}
+            columns={columns}
+            getRowId={(row) => row.id}
+          />
         </div>
 
-        {/* Dialog for editing car */}
         <Dialog open={isEditOpen} onClose={() => setIsEditOpen(false)}>
           <DialogTitle>Редактировать машину</DialogTitle>
           <DialogContent>
