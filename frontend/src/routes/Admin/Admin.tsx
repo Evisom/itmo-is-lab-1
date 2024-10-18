@@ -1,8 +1,8 @@
 // @ts-nocheck
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "./../../store/store";
-import { setUsername, setToken } from "./../../store/userSlice";
+import { RootState } from "../../store/store";
+import { setUsername, setToken } from "../../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -12,8 +12,16 @@ import {
   AlertTitle,
   Typography,
 } from "@mui/material";
-import { Header } from "./../../components/Header";
+import { Header } from "../../components/Header";
 import { BASEURL } from "../..";
+import limboaudio from "../../limbo.mp3";
+import useSWR from "swr";
+import "./Admin.css";
+
+const fetcher = (url: string, token: string) =>
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) =>
+    res.json()
+  );
 
 export const Admin = () => {
   const dispatch = useDispatch();
@@ -31,116 +39,110 @@ export const Admin = () => {
       localStorage.getItem("id")
   );
 
-  const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
-  const [limboList, setLimboList] = useState([]);
+  const { data: userData, error: userError } = useSWR(
+    `/users/${id}`,
+    (url) => fetcher(url, token),
+    { refreshInterval: 2000 }
+  );
 
-  // Fetch admin status and limbo list every 2 seconds
-  const fetchData = () => {
-    fetch(`/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setIsAdmin(response.roles.includes("ADMIN"));
-        if (!response.roles.includes("ADMIN")) {
-          navigate(BASEURL + "/");
-        }
-      })
-      .catch(() => {
-        console.log("Ошибка проверки админа");
-      });
+  const { data: limboList, error: limboError } = useSWR(
+    "/limbo",
+    (url) => fetcher(url, token),
+    { refreshInterval: 2000 }
+  );
 
-    fetch("/limbo", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setLimboList(response);
-      })
-      .catch(() => {
-        console.log("Ошибка загрузки лимболиста");
-      });
-  };
+  // State to control screamer visibility
+  const [isScreamerVisible, setIsScreamerVisible] = useState(false);
 
   useEffect(() => {
-    // Initial fetch
-    fetchData();
-    // Set up interval to refresh every 2 seconds
-    const interval = setInterval(fetchData, 2000);
-    return () => clearInterval(interval); // Clean up interval on component unmount
-  }, [token, id, navigate]);
+    if (userData && !userData.roles.includes("ADMIN")) {
+      navigate(BASEURL + "/");
+    }
 
-  const handleReject = (userId) => {
+    // Randomly show the screamer
+    const randomTimeout = Math.random() * (3000 - 2000) + 4000; // Random time between 2000ms and 3000ms
+
+    const timeout = setTimeout(() => {
+      setIsScreamerVisible(true);
+      setTimeout(() => {
+        setIsScreamerVisible(false);
+      }, 500); // Show screamer for 1 second
+    }, randomTimeout);
+
+    return () => clearTimeout(timeout);
+  }, [userData, navigate]);
+
+  const handleReject = (userId: number) => {
     fetch(`/limbo?userId=${userId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(fetchData)
+      .then(() => mutate("/limbo")) // revalidate SWR
       .catch(() => console.log("Ошибка отклонения запроса"));
   };
 
-  const handleApprove = (userId) => {
+  const handleApprove = (userId: number) => {
     fetch(`/users/addAdminRole/${userId}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(fetchData)
+      .then(() => mutate("/limbo")) // revalidate SWR
       .catch(() => console.log("Ошибка добавления прав администратора"));
   };
 
   return (
-    <div>
-      <Header
-        isAdmin={isAdmin}
-        username={username}
-        onLogout={() => {
-          localStorage.clear();
-          dispatch(setToken(""));
-          navigate(BASEURL + "/");
-        }}
-      />
-      <Container
-        maxWidth="xxl"
-        style={{
-          marginTop: 24,
-          display: "flex",
-          flexDirection: "column",
-          gap: 24,
-        }}
-      >
-        {limboList.length === 0 ? (
-          <Alert severity="info" style={{ padding: 20 }}>
-            <AlertTitle>Нет запросов</AlertTitle>
-            <Typography variant="body1">
-              В данный момент нет запросов на получение прав администратора.
-            </Typography>
-          </Alert>
-        ) : (
-          limboList.map((user) => (
-            <Alert
-              severity="info"
-              style={{ position: "relative" }}
-              key={user.id}
-            >
-              <AlertTitle>Запрос на получение прав администратора</AlertTitle>
-              {user.login} (id: {user.id}) запрашивает права администратора
-              <ButtonGroup
-                style={{
-                  position: "absolute",
-                  right: 16,
-                  top: 20,
-                }}
-                disableElevation
-                variant="outlined"
-                aria-label="Admin request actions"
-              >
-                <Button onClick={() => handleReject(user.id)}>Отклонить</Button>
-                <Button onClick={() => handleApprove(user.id)}>Принять</Button>
-              </ButtonGroup>
+    <div className="admin-wallpaper">
+      {isScreamerVisible && (
+        <div className="screamer">
+          <img
+            src="https://steamuserimages-a.akamaihd.net/ugc/541895114146917959/0401863718C70373FAC6579A8ACA70C9F2C11562/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false"
+            alt="Screamer"
+            className="screamer-image"
+          />
+        </div>
+      )}
+      <div className="admin-container">
+        <Header
+          isAdmin={userData?.roles.includes("ADMIN")}
+          username={username}
+          onLogout={() => {
+            localStorage.clear();
+            dispatch(setToken(""));
+            navigate(BASEURL + "/");
+          }}
+        />
+        <Container maxWidth="xxl" className="admin-content">
+          {limboList?.length === 0 ? (
+            <Alert severity="info" className="admin-alert">
+              <AlertTitle>Нет запросов</AlertTitle>
+              <Typography variant="body1">
+                В данный момент нет запросов на получение прав администратора.
+              </Typography>
             </Alert>
-          ))
-        )}
-      </Container>
+          ) : (
+            limboList?.map((user) => (
+              <Alert severity="info" className="admin-alert" key={user.id}>
+                <AlertTitle>Запрос на получение прав администратора</AlertTitle>
+                {user.login} (id: {user.id}) запрашивает права администратора
+                <ButtonGroup
+                  className="admin-button-group"
+                  disableElevation
+                  variant="outlined"
+                  aria-label="Admin request actions"
+                >
+                  <Button onClick={() => handleReject(user.id)}>
+                    Отклонить
+                  </Button>
+                  <Button onClick={() => handleApprove(user.id)}>
+                    Принять
+                  </Button>
+                </ButtonGroup>
+              </Alert>
+            ))
+          )}
+        </Container>
+        <audio id="background-music" autoPlay src={limboaudio} loop />
+      </div>
     </div>
   );
 };
