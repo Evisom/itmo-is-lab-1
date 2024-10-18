@@ -72,7 +72,7 @@ public class HumanBeingService {
             predicates.add(cb.equal(humanBeing.get("name"), name));
         }
         if (coordinatesId != null) {
-            predicates.add(cb.equal(humanBeing.get("coordinatesId"), coordinatesId));
+            predicates.add(cb.equal(humanBeing.get("coordinates").get("id"), coordinatesId));
         }
 
         if (realHero != null) {
@@ -112,10 +112,10 @@ public class HumanBeingService {
 
 
         if (carId != null) {
-            predicates.add(cb.equal(humanBeing.get("carId"), carId));
+            predicates.add(cb.equal(humanBeing.get("car").get("id"), carId));
         }
 
-        if (sortOrder!=null) {
+        if (sortOrder!=null && filterField!=null) {
 
             if ("asc".equalsIgnoreCase(sortOrder)) {
                 query.orderBy(cb.asc(humanBeing.get(filterField)));
