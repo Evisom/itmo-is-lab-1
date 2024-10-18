@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { Header } from "./../../components/Header";
 import "./Object.scss";
+import { BASEURL } from "./../../index";
 
 // Mood and WeaponType options
 const moods = ["SORROW", "APATHY", "CALM", "FRENZY"];
@@ -195,7 +196,7 @@ export const ObjectPage = ({ type }) => {
       body: JSON.stringify(bodyObject),
     }).then((response) => {
       if (response.status === 200) {
-        navigate("/");
+        navigate(BASEURL + "/");
       }
     });
   };
@@ -208,7 +209,7 @@ export const ObjectPage = ({ type }) => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate("/");
+          navigate(BASEURL + "/");
         }}
       />
       <Container maxWidth="xxl">
@@ -241,7 +242,7 @@ export const ObjectPage = ({ type }) => {
                       }
                     })
                     .then(() => {
-                      navigate("/");
+                      navigate(BASEURL + "/");
                     });
                 }}
               >

@@ -20,6 +20,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Header } from "./../../components/Header";
+import { BASEURL } from "../..";
 
 export const Car = () => {
   const dispatch = useDispatch();
@@ -52,7 +53,7 @@ export const Car = () => {
       .then((response) => {
         setIsAdmin(response.roles.includes("ADMIN"));
         if (!response.roles.includes("ADMIN")) {
-          navigate("/");
+          navigate(BASEURL + "/");
         }
       })
       .catch(() => {
@@ -199,7 +200,7 @@ export const Car = () => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate("/");
+          navigate(BASEURL + "/");
         }}
       />
       <Container maxWidth="xxl" style={{ marginTop: 24 }}>

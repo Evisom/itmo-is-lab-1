@@ -18,6 +18,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { BASEURL } from ".";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -88,7 +89,7 @@ const App = () => {
     const lsToken = localStorage.getItem("token");
     const lsUsername = localStorage.getItem("username");
     if (!(token || lsToken)) {
-      navigate("/login");
+      navigate(BASEURL + "/login");
     }
     if (lsToken && !token) {
       dispatch(setToken(lsToken));
@@ -129,7 +130,7 @@ const App = () => {
       field: "id",
       headerName: "ID",
       renderCell: (params) => (
-        <a style={{ color: "white" }} href={`/view/${params.row.id}`}>
+        <a style={{ color: "white" }} href={`${BASEURL}/view/${params.row.id}`}>
           {params.row.id}
         </a>
       ),
@@ -210,7 +211,9 @@ const App = () => {
               <IconButton onClick={() => handleDeleteHuman(params.row.id)}>
                 <DeleteIcon />
               </IconButton>
-              <IconButton onClick={() => navigate(`/edit/${params.row.id}`)}>
+              <IconButton
+                onClick={() => navigate(BASEURL + `/edit/${params.row.id}`)}
+              >
                 <EditIcon />
               </IconButton>
             </>
@@ -228,7 +231,7 @@ const App = () => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate("/");
+          navigate(BASEURL + "/");
         }}
       />
       <Container maxWidth="xxl" style={{ marginTop: 24 }}>

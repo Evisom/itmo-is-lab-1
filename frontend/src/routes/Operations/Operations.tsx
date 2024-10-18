@@ -35,6 +35,7 @@ import {
 } from "@mui/material";
 import { Header } from "./../../components/Header";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { BASEURL } from "../..";
 
 export const Operations = () => {
   const dispatch = useDispatch();
@@ -63,7 +64,7 @@ export const Operations = () => {
       .then((response) => {
         setIsAdmin(response.roles.includes("ADMIN"));
         if (!response.roles.includes("ADMIN")) {
-          navigate("/");
+          navigate(BASEURL + "/");
         }
       })
       .catch(() => {
@@ -87,7 +88,7 @@ export const Operations = () => {
         onLogout={() => {
           localStorage.clear();
           dispatch(setToken(""));
-          navigate("/");
+          navigate(BASEURL + "/");
         }}
       />
       <Container
@@ -243,12 +244,12 @@ export const Operations = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
-                      <TableCell>Имя</TableCell>
+                      <TableCell align="right">Имя</TableCell>
                       <TableCell align="right">Саундтрек</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {action3.map((row) => (
+                    {action3Result.map((row) => (
                       <TableRow
                         key={row.name}
                         sx={{

@@ -16,6 +16,7 @@ import "./Login.scss";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setUsername, setToken, setId } from "../../store/userSlice";
+import { BASEURL } from "../..";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +65,7 @@ export const Login = () => {
         localStorage.setItem("id", response.userId);
         localStorage.setItem("username", username);
         localStorage.setItem("token", response.accessToken); // запишем при успешном логине в стор токен и юзернейм
-        navigate("/");
+        navigate(BASEURL + "/");
       })
       .then((response) => {})
       .catch(() => {
@@ -128,7 +129,7 @@ export const Login = () => {
         <Link
           style={{ textAlign: "center" }}
           underline="hover"
-          href="/register"
+          href={BASEURL + "/register"}
         >
           Нет аккаунта
         </Link>
