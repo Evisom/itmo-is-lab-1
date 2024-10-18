@@ -1,49 +1,144 @@
 package com.example.backend.service;
 
 import com.example.backend.domain.HumanBeing;
+import com.example.backend.domain.Mood;
+import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.Car;
 import com.example.backend.entity.Coordinates;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.exception.NoEntityException;
 import com.example.backend.repository.CarRepo;
 import com.example.backend.repository.CoordinatesRepo;
 import com.example.backend.repository.HumanBeingRepo;
 import com.example.backend.repository.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
 @Service
+@RequiredArgsConstructor
 public class HumanBeingService {
+    private final EntityManager entityManager;
 
-    @Autowired
-    private HumanBeingRepo humanBeingRepo;
+    private final JwtProvider jwtProvider;
 
-    @Autowired
-    private UserRepo userRepo;
 
-    @Autowired
-    private CarRepo carRepo;
 
-    @Autowired
-    private CoordinatesRepo coordinatesRepo;
 
-    public HumanBeing getHumanBeing(Long id) {
-        HumanBeingEntity humanBeing = humanBeingRepo.findById(id).get();
+    private final HumanBeingRepo humanBeingRepo;
+
+
+    private final UserRepo userRepo;
+
+
+    private final CarRepo carRepo;
+
+
+    private final CoordinatesRepo coordinatesRepo;
+
+    @Transactional(readOnly = true)
+    public HumanBeing getHumanBeing(Long id) throws NoEntityException {
+        HumanBeingEntity humanBeing = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         return HumanBeing.toModel(humanBeing);
     }
 
-    public List<HumanBeing> getAllHumanBeing() {
-        return humanBeingRepo.findAll().stream().map(HumanBeing::toModel).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<HumanBeing> getFilteredHumans(String name, Long coordinatesId, LocalDateTime creationDate, Boolean realHero,
+                                              Boolean hasToothpick, Long carId, Mood mood, Double impactSpeed, String soundtrackName,
+                                              Double minutesOfWaiting, WeaponType weaponType, String filterField, String sortOrder) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HumanBeingEntity> query = cb.createQuery(HumanBeingEntity.class);
+        Root<HumanBeingEntity> humanBeing = query.from(HumanBeingEntity.class);
+
+
+        List<Predicate> predicates = new ArrayList<>();
+
+
+        if (name != null) {
+            predicates.add(cb.equal(humanBeing.get("name"), name));
+        }
+        if (coordinatesId != null) {
+            predicates.add(cb.equal(humanBeing.get("coordinatesId"), coordinatesId));
+        }
+
+        if (realHero != null) {
+            predicates.add(cb.equal(humanBeing.get("realHero"), realHero));
+        }
+
+
+        if (impactSpeed != null) {
+            predicates.add(cb.equal(humanBeing.get("impactSpeed"), impactSpeed));
+        }
+
+
+        if (weaponType != null) {
+            predicates.add(cb.equal(humanBeing.get("weaponType"), weaponType));
+        }
+        if (creationDate != null) {
+            predicates.add(cb.equal(humanBeing.get("creationDate"), creationDate));
+        }
+
+
+        if (hasToothpick != null) {
+            predicates.add(cb.equal(humanBeing.get("hasToothpick"), hasToothpick));
+        }
+
+
+        if (soundtrackName != null) {
+            predicates.add(cb.equal(humanBeing.get("soundtrackName"), soundtrackName));
+        }
+        if (minutesOfWaiting != null) {
+            predicates.add(cb.equal(humanBeing.get("minutesOfWaiting"), minutesOfWaiting));
+        }
+
+
+        if (mood != null) {
+            predicates.add(cb.equal(humanBeing.get("mood"), mood));
+        }
+
+
+        if (carId != null) {
+            predicates.add(cb.equal(humanBeing.get("carId"), carId));
+        }
+
+        if (sortOrder!=null) {
+
+            if ("asc".equalsIgnoreCase(sortOrder)) {
+                query.orderBy(cb.asc(humanBeing.get(filterField)));
+            } else {
+                query.orderBy(cb.desc(humanBeing.get(filterField)));
+            }
+        }
+
+        query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
+
+
+        return entityManager.createQuery(query).getResultList().stream().map(HumanBeing::toModel).collect(Collectors.toList());
+
     }
 
-    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) {
-        UserEntity user = userRepo.findById(userId).get();
+    @Transactional
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId, String token) throws NoEntityException, AccessDeniedException {
+
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        if (!checkRights(userId,token)){
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
 
         Long carId = human.getCar().getId();
         Car car;
@@ -52,7 +147,7 @@ public class HumanBeingService {
             car.setCool(human.getCar().getCool());
             carRepo.save(car);
         } else {
-            car = carRepo.findById(carId).get();
+            car = carRepo.findById(carId).orElseThrow(() -> new NoEntityException("no such entity"));
 
         }
 
@@ -64,7 +159,7 @@ public class HumanBeingService {
             coordinates.setY(human.getCoordinates().getY());
             coordinatesRepo.save(coordinates);
         } else {
-            coordinates = coordinatesRepo.findById(coorId).get();
+            coordinates = coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity"));
 
         }
 
@@ -74,34 +169,42 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
-    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) {
-        HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).get();
+
+
+    @Transactional
+    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails, String token) throws NoEntityException, AccessDeniedException {
+        HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
-        Coordinates coordinates ;
+        Coordinates coordinates;
+
+
+        if (!checkRights(humanBeingEntity.getUser().getId(),token)){
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
+
 
         Long carId = humanBeingDetails.getCar().getId();
 
         if (carId == null) {
-            car = carRepo.findById(humanBeingEntity.getCar().getId()).get();
+            car = carRepo.findById(humanBeingEntity.getCar().getId()).orElseThrow(() -> new NoEntityException("no such entity"));
             car.setCool(humanBeingDetails.getCar().getCool());
             carRepo.save(car);
         } else {
-            humanBeingEntity.setCar(carRepo.findById(carId).get());
+            humanBeingEntity.setCar(carRepo.findById(carId).orElseThrow(() -> new NoEntityException("no such entity")));
         }
 
 
         Long coorId = humanBeingDetails.getCoordinates().getId();
+
         if (coorId == null) {
-            coordinates =  coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).get();
+            coordinates = coordinatesRepo.findById(humanBeingEntity.getCoordinates().getId()).orElseThrow(() -> new NoEntityException("no such entity"));
             coordinates.setX(humanBeingDetails.getCoordinates().getX());
             coordinates.setY(humanBeingDetails.getCoordinates().getY());
             coordinatesRepo.save(coordinates);
         } else {
-            humanBeingEntity.setCoordinates(coordinatesRepo.findById(coorId).get());
+            humanBeingEntity.setCoordinates(coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity")));
 
         }
-
-
 
 
         humanBeingEntity.setName(humanBeingDetails.getName());
@@ -114,15 +217,15 @@ public class HumanBeingService {
         humanBeingEntity.setWeaponType(humanBeingDetails.getWeaponType());
 
 
-
         humanBeingRepo.save(humanBeingEntity);
 
         return HumanBeing.toModel(humanBeingEntity);
     }
 
+    @Transactional
+    public boolean deleteHumanBeing(Long id, String token) throws NoEntityException {
 
-    public boolean deleteHumanBeing(Long id) {
-        if (humanBeingRepo.existsById(id)) {
+        if (checkRights(humanBeingRepo.findById(id).orElseThrow().getUser().getId(),token)) {
             humanBeingRepo.deleteById(id);
             return true;
         }
@@ -130,15 +233,18 @@ public class HumanBeingService {
     }
 
 
-
+    @Transactional(readOnly = true)
     public int getHumanCountBySoundtrackName(String soundtrackName) {
         return humanBeingRepo.getHumanCountBySoundtrackName(soundtrackName);
     }
+
+    @Transactional(readOnly = true)
 
     public int getHumanCountByWeaponType(String weaponType) {
         return humanBeingRepo.getHumanCountByWeaponType(weaponType);
     }
 
+    @Transactional(readOnly = true)
     public List<HumanBeing> getHumansBySoundtrackName(String soundtrackName) {
         return humanBeingRepo.getHumansBySoundtrackName(soundtrackName).stream().map(HumanBeing::toModel).collect(Collectors.toList());
     }
@@ -152,4 +258,14 @@ public class HumanBeingService {
     public void updateHumansWithoutCars() {
         humanBeingRepo.updateHumansWithoutCars();
     }
+
+    private boolean checkRights(Long userId, String token) throws NoEntityException {
+        String usernameFromToken = jwtProvider.getAccessClaims(token).getSubject();
+        List<String> roles = jwtProvider.extractRoles(token);
+
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+        return Objects.equals(user.getLogin(), usernameFromToken) || roles.contains("ADMIN");
+    }
+
+
 }

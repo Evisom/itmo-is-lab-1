@@ -1,11 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.entity.Car;
 import com.example.backend.entity.Coordinates;
 import com.example.backend.exception.NoEntityException;
-import com.example.backend.service.CarService;
 import com.example.backend.service.CoordinatesService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/coordinates")
+@RequiredArgsConstructor
 public class CoordinatesController {
-    @Autowired
-    private CoordinatesService coordinatesService;
+
+    private final CoordinatesService coordinatesService;
 
     @GetMapping
     public ResponseEntity<List<Coordinates>> getAllCoordinates(){

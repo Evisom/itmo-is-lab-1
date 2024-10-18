@@ -1,44 +1,64 @@
 package com.example.backend.controller;
 
 import com.example.backend.domain.HumanBeing;
+import com.example.backend.domain.Mood;
+import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.HumanBeingEntity;
+import com.example.backend.exception.NoEntityException;
 import com.example.backend.service.HumanBeingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/humanbeings")
+@RequiredArgsConstructor
 public class HumanBeingController {
 
-    @Autowired
-    private HumanBeingService humanBeingService;
+
+    private final HumanBeingService humanBeingService;
 
     @GetMapping("/{id}")
-    public ResponseEntity getHumanBeing(@PathVariable Long id){
+    public ResponseEntity<HumanBeing> getHumanBeing(@PathVariable Long id){
         try {
             return ResponseEntity.ok(humanBeingService.getHumanBeing(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.badRequest().build();
         }
 
     }
     @GetMapping
-    public ResponseEntity<List<HumanBeing>> getAllHumanBeing(){
-            return ResponseEntity.ok(humanBeingService.getAllHumanBeing());
+    public ResponseEntity<List<HumanBeing>> getFilteredHumans(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long coordinatesId,
+            @RequestParam(required = false) LocalDateTime creationDate,
+            @RequestParam(required = false) Boolean realHero,
+            @RequestParam(required = false) Boolean hasToothpick,
+            @RequestParam(required = false) Long carId,
+            @RequestParam(required = false) Mood mood,
+            @RequestParam(required = false) Double impactSpeed,
+            @RequestParam(required = false) String soundtrackName,
+            @RequestParam(required = false) Double minutesOfWaiting,
+            @RequestParam(required = false) WeaponType weaponType,
+            @RequestParam(required = false) String filterField,
+            @RequestParam(required = false) String sortOrder
+    ){
+            return ResponseEntity.ok(humanBeingService.getFilteredHumans(name,coordinatesId,creationDate,realHero,hasToothpick,carId,
+                    mood,impactSpeed,soundtrackName,minutesOfWaiting,weaponType,filterField,sortOrder));
 
 
     }
 
     @PostMapping
-    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,
-                                           @RequestParam Long userId){
+    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,  @RequestParam Long userId, @RequestHeader("Authorization") String token){
         try {
-            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId));
+            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId,token.substring(7)));
+        }catch (AccessDeniedException e) {
+            return ResponseEntity.status(403).build();
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
@@ -46,16 +66,16 @@ public class HumanBeingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity) {
+    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity, @RequestHeader("Authorization") String token) {
         try {
-            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
+            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity,token.substring(7)));
         }catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id) {
-        if (humanBeingService.deleteHumanBeing(id)) {
+    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id, @RequestHeader("Authorization") String token) throws NoEntityException {
+        if (humanBeingService.deleteHumanBeing(id,token.substring(7))) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
