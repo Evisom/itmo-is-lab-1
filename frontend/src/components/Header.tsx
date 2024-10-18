@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const { data: userData } = useSWR(BASEURL + "/api/user", fetcher);
+  // const { data: userData } = useSWR(BASEURL + "/api/user", fetcher);
 
   return (
     <AppBar position="sticky">

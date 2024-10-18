@@ -10,6 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
 import { Header } from "./components/Header";
 import { BASEURL } from ".";
+import "./App.scss";
 
 // SWR fetcher function
 const fetcher = (url) =>
@@ -58,6 +59,11 @@ const App = () => {
   const [filterModel, setFilterModel] = useState({
     items: [],
   });
+
+  const { data: adminData } = useSWR(
+    `/users/${localStorage.getItem("id")}`,
+    fetcher
+  );
 
   // Функция для корректного формирования фильтров для API на основе модели фильтров DataGrid
   const buildFilterQuery = (items) => {
@@ -148,7 +154,11 @@ const App = () => {
       filterable: true,
       flex: 1,
       renderCell: (params) =>
-        params.row.realHero ? <CheckIcon /> : <ClearIcon />,
+        params.row.realHero ? (
+          <CheckIcon className="app-table-icon" />
+        ) : (
+          <ClearIcon className="app-table-icon" />
+        ),
       filterOperators: equalsOnlyOperator,
     },
     {
@@ -158,7 +168,11 @@ const App = () => {
       filterable: true,
       flex: 1,
       renderCell: (params) =>
-        params.row.hasToothpick ? <CheckIcon /> : <ClearIcon />,
+        params.row.hasToothpick ? (
+          <CheckIcon className="app-table-icon" />
+        ) : (
+          <ClearIcon className="app-table-icon" />
+        ),
       filterOperators: equalsOnlyOperator,
     },
     {
@@ -234,6 +248,7 @@ const App = () => {
     <div className="App">
       <Header
         username={localStorage.getItem("username")}
+        isAdmin={adminData?.roles.includes("ADMIN")}
         onLogout={() => {
           localStorage.clear();
           navigate(BASEURL + "/");

@@ -49,12 +49,10 @@ export const Car = () => {
   const [editData, setEditData] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // SWR for admin status
   const { data: adminData } = useSWR(`/users/${id}`, (url) =>
     fetcher(url, token)
   );
 
-  // SWR for fetching cars
   const { data: cars, mutate: mutateCars } = useSWR(
     "/cars",
     (url) => fetcher(url, token),

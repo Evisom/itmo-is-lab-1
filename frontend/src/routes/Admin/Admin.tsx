@@ -51,7 +51,6 @@ export const Admin = () => {
     { refreshInterval: 2000 }
   );
 
-  // State to control screamer visibility
   const [isScreamerVisible, setIsScreamerVisible] = useState(false);
 
   useEffect(() => {
@@ -59,14 +58,13 @@ export const Admin = () => {
       navigate(BASEURL + "/");
     }
 
-    // Randomly show the screamer
-    const randomTimeout = Math.random() * (3000 - 2000) + 4000; // Random time between 2000ms and 3000ms
+    const randomTimeout = Math.random() * (3000 - 2000) + 4000;
 
     const timeout = setTimeout(() => {
       setIsScreamerVisible(true);
       setTimeout(() => {
         setIsScreamerVisible(false);
-      }, 500); // Show screamer for 1 second
+      }, 500);
     }, randomTimeout);
 
     return () => clearTimeout(timeout);
