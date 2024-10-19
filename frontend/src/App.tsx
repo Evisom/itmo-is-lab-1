@@ -244,6 +244,10 @@ const App = () => {
     },
   ];
 
+  useEffect(() => {
+    localStorage.setItem("admin", adminData?.roles.includes("ADMIN"));
+  }, [adminData]);
+
   return (
     <div className="App">
       <Header
