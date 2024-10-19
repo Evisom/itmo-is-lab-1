@@ -37,8 +37,6 @@ public class HumanBeingService {
     private final JwtProvider jwtProvider;
 
 
-
-
     private final HumanBeingRepo humanBeingRepo;
 
 
@@ -115,15 +113,15 @@ public class HumanBeingService {
             predicates.add(cb.equal(humanBeing.get("car").get("id"), carId));
         }
 
-        if (sortOrder!=null && filterField!=null) {
+        if (sortOrder != null && filterField != null) {
 
-            if (!filterField.equals("carId") && !filterField.equals("coordinatesId")){
+            if (!filterField.equals("carId") && !filterField.equals("coordinatesId")) {
                 if ("asc".equalsIgnoreCase(sortOrder)) {
                     query.orderBy(cb.asc(humanBeing.get(filterField)));
                 } else {
                     query.orderBy(cb.desc(humanBeing.get(filterField)));
                 }
-            }else if (filterField.equals("carId")){
+            } else if (filterField.equals("carId")) {
                 if ("asc".equalsIgnoreCase(sortOrder)) {
                     query.orderBy(cb.asc(humanBeing.get("car").get("id")));
                 } else {
@@ -152,7 +150,7 @@ public class HumanBeingService {
 
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
 
-        if (!checkRights(userId,token)){
+        if (!checkRights(userId, token)) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -186,7 +184,6 @@ public class HumanBeingService {
     }
 
 
-
     @Transactional
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails, String token) throws NoEntityException, AccessDeniedException {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
@@ -194,7 +191,7 @@ public class HumanBeingService {
         Coordinates coordinates;
 
 
-        if (!checkRights(humanBeingEntity.getUser().getId(),token)){
+        if (!checkRights(humanBeingEntity.getUser().getId(), token)) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -241,11 +238,21 @@ public class HumanBeingService {
     @Transactional
     public boolean deleteHumanBeing(Long id, String token) throws NoEntityException {
 
-        if (checkRights(humanBeingRepo.findById(id).orElseThrow().getUser().getId(),token)) {
-            humanBeingRepo.deleteById(id);
-            return true;
+        HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElse(null);
+
+        if (humanBeingEntity == null) {
+            return false;
         }
-        return false;
+
+        if (!checkRights(humanBeingEntity.getUser().getId(), token)) {
+            return false;
+        }
+
+        humanBeingRepo.deleteById(id);
+
+        return true;
+
+
     }
 
 
