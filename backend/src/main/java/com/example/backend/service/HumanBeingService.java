@@ -117,11 +117,27 @@ public class HumanBeingService {
 
         if (sortOrder!=null && filterField!=null) {
 
-            if ("asc".equalsIgnoreCase(sortOrder)) {
-                query.orderBy(cb.asc(humanBeing.get(filterField)));
+            if (!filterField.equals("carId") && !filterField.equals("coordinatesId")){
+                if ("asc".equalsIgnoreCase(sortOrder)) {
+                    query.orderBy(cb.asc(humanBeing.get(filterField)));
+                } else {
+                    query.orderBy(cb.desc(humanBeing.get(filterField)));
+                }
+            }else if (filterField.equals("carId")){
+                if ("asc".equalsIgnoreCase(sortOrder)) {
+                    query.orderBy(cb.asc(humanBeing.get("car").get("id")));
+                } else {
+                    query.orderBy(cb.desc(humanBeing.get("car").get("id")));
+                }
             } else {
-                query.orderBy(cb.desc(humanBeing.get(filterField)));
+                if ("asc".equalsIgnoreCase(sortOrder)) {
+                    query.orderBy(cb.asc(humanBeing.get("coordinates").get("id")));
+                } else {
+                    query.orderBy(cb.desc(humanBeing.get("coordinates").get("id")));
+                }
             }
+
+
         }
 
         query.select(humanBeing).where(predicates.toArray(new Predicate[0]));
