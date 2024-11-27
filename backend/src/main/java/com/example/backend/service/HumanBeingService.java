@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
@@ -235,7 +236,7 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingEntity);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean deleteHumanBeing(Long id, String token) throws NoEntityException {
 
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElse(null);
