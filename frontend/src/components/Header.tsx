@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,9 +20,11 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const navigate = useNavigate();
-
-  // const { data: userData } = useSWR(BASEURL + "/api/user", fetcher);
-
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate(BASEURL + "/login");
+    }
+  });
   return (
     <AppBar position="sticky">
       <Toolbar>
@@ -35,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
           IS-LAB-1
         </Typography>
         <div className="header-actions">
-          {isAdmin && (
+          {(isAdmin || localStorage.getItem("admin") === "true") && (
             <Typography component="a" href={BASEURL + "/admin"}>
               АДМИНКА
             </Typography>
@@ -60,10 +62,11 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div className="header-user">
             <AccountCircleIcon />
-            <Typography>{username || userData?.username}</Typography>
+            <Typography>{username}</Typography>
           </div>
           <LogoutIcon
             onClick={() => {
+              localStorage.clear();
               navigate(BASEURL + "/login");
             }}
           />

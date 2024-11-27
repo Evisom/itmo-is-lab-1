@@ -60,6 +60,12 @@ const App = () => {
     items: [],
   });
 
+  // useEffect(() => {
+  //   if (!localStorage.getItem("token")) {
+  //     navigate(BASEURL + "/login");
+  //   }
+  // });
+
   const { data: adminData } = useSWR(
     `/users/${localStorage.getItem("id")}`,
     fetcher
@@ -243,6 +249,10 @@ const App = () => {
       ),
     },
   ];
+
+  useEffect(() => {
+    localStorage.setItem("admin", adminData?.roles.includes("ADMIN"));
+  }, [adminData]);
 
   return (
     <div className="App">
