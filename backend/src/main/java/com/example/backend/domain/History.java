@@ -18,12 +18,14 @@ public class History {
     private Long userId;
     private ImportStatus status;
     private Integer addedObjectsCount;
+    private String login;
 
 
     public static History toModel(ImportHistoryEntity historyEntity){
         History  model = new History();
         model.setId(historyEntity.getId());
         model.setUserId(historyEntity.getUser().getId());
+        model.setLogin(historyEntity.getLogin());
         model.setStatus(historyEntity.getStatus());
         model.setAddedObjectsCount(historyEntity.getAddedObjectsCount());
         return model;
