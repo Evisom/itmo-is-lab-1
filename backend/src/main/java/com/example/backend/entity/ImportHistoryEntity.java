@@ -18,12 +18,16 @@ public class ImportHistoryEntity {
     @ManyToOne
     private UserEntity user;
 
-
+    private String login;
 
     @Enumerated(EnumType.STRING)
     private ImportStatus status;
 
     private Integer addedObjectsCount;
+
+    public void setLogin(){
+        this.login = this.user.getLogin();
+    }
 
 
 }
