@@ -35,7 +35,9 @@ public class ImportService {
     public void importFile(MultipartFile file, Long userId) throws Exception {
         ImportHistoryEntity historyEntity = new ImportHistoryEntity();
         historyEntity.setStatus(ImportStatus.IN_PROGRESS);
+
         historyEntity.setUser(userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("No such user")));
+        historyEntity.setLogin();
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
@@ -82,8 +84,8 @@ public class ImportService {
             return  importHistoryRepository.findAll().stream().map(History::toModel).collect(Collectors.toList());
 
         }
-        String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity user = userRepo.findByLogin(login).orElse(null);
+        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         return  importHistoryRepository.findByUser(user).stream().map(History::toModel).collect(Collectors.toList());
 
 
