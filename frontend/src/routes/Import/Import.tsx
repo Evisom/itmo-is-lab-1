@@ -14,12 +14,11 @@ import {
 } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { Header } from "../../components/Header";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { BASEURL } from "../..";
 import { MuiFileInput } from "mui-file-input";
 import "./Import.scss";
 
-// Fetch function for SWR
 const fetcher = (url: string, token: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) =>
     res.json()
@@ -45,7 +44,6 @@ export const Import = () => {
     fetcher(url, token)
   );
 
-  // Fetch history data using SWR
   const { data: historyData, error: historyError } = useSWR(`/history`, (url) =>
     fetcher(url, token)
   );
@@ -54,19 +52,21 @@ export const Import = () => {
   const [file, setFile] = useState(null);
   const [alert, setAlert] = useState(null);
 
-  const rows = historyData?.map((entry: any) => ({
-    id: entry.id,
-    userId: entry.userId,
-    username: entry?.username,
-    status: entry.status,
-    addedObjectsCount: entry.addedObjectsCount,
-  }));
+  const rows = historyData
+    ?.map((entry: any) => ({
+      id: entry.id,
+      userId: entry.userId,
+      username: entry.login,
+      status: entry.status,
+      addedObjectsCount: entry.addedObjectsCount,
+    }))
+    .reverse();
 
-  // Columns for DataGrid
+  console.log(historyData);
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 1 },
     {
-      field: "userid",
+      field: "userId",
       headerName: "User ID",
       flex: 1,
       renderCell: (params) => users[params.row.userId],
@@ -96,6 +96,10 @@ export const Import = () => {
       body: formData,
     })
       .then((res) => {
+        setFile(null);
+        setTimeout(() => {
+          mutate(`/history`);
+        }, 500);
         if (res.status === 200) {
           setAlert({
             text: "Файл успешно загружен",
@@ -158,7 +162,7 @@ export const Import = () => {
         <div style={{ height: 400, width: "100%", marginTop: 40 }}>
           <Typography variant="h6">История операций</Typography>
           <div style={{ height: "100%" }}>
-            <DataGrid rows={rows} columns={columns} pagination={false} />
+            <DataGrid rows={rows} columns={columns} hideFooter />
           </div>
         </div>
       </Container>
