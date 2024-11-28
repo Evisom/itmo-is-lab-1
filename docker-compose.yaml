@@ -1,18 +1,14 @@
 version: "3.8"
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    links:
-      - backend
-    networks:
-      - app-network
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - app-network
 
   backend:
     build:
@@ -22,7 +18,6 @@ services:
       - "3001:8080"
     networks:
       - app-network
-
 networks:
   app-network:
     driver: bridge

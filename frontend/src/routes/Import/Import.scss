@@ -1,0 +1,8 @@
+.upload-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  & > .MuiTextField-root {
+    width: -webkit-fill-available;
+  }
+}

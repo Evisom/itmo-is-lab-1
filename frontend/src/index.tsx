@@ -20,6 +20,7 @@ import { store } from "./store/store";
 import { Operations } from "./routes/Operations";
 import { Coordinates } from "./routes/Coordinates";
 import { Car } from "./routes/Car";
+import { Import } from "./routes/Import";
 
 export const BASEURL = "/~s369074";
 // export const BASEURL = "";
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
   {
     path: BASEURL + "/car",
     element: <Car />,
+  },
+  {
+    path: BASEURL + "/import",
+    element: <Import />,
   },
 ]);
 

@@ -59,6 +59,9 @@ export const Header: React.FC<HeaderProps> = ({
           <Typography component="a" href={BASEURL + "/car"}>
             МАШИНЫ
           </Typography>
+          <Typography component="a" href={BASEURL + "/import"}>
+            ИМПОРТ
+          </Typography>
 
           <div className="header-user">
             <AccountCircleIcon />
