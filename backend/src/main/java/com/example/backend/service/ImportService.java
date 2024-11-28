@@ -1,46 +1,84 @@
 package com.example.backend.service;
 
+import com.example.backend.config.ImportStatus;
+import com.example.backend.domain.History;
 import com.example.backend.domain.HumanBeing;
+import com.example.backend.domain.Role;
+import com.example.backend.entity.ImportHistoryEntity;
+import com.example.backend.entity.UserEntity;
+import com.example.backend.exception.UserNotFoundException;
+import com.example.backend.repository.ImportHistoryRepository;
+import com.example.backend.repository.UserRepo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ImportService {
     private final HumanBeingService humanBeingService;
-
+    private final UserRepo userRepo;
     private final ObjectMapper objectMapper;
+    private final ImportHistoryRepository importHistoryRepository;
 
     @Transactional
     public void importFile(MultipartFile file, Long userId, String token) throws Exception {
-
+        ImportHistoryEntity historyEntity = new ImportHistoryEntity();
+        historyEntity.setStatus(ImportStatus.IN_PROGRESS);
+        historyEntity.setUser(userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("No such user")));
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
         String fileName = file.getOriginalFilename();
         assert fileName != null;
         if (fileName.endsWith(".json")) {
-            importFromJson(file,userId,token);
+            try {
+                int count = importFromJson(file, userId, token);
+                historyEntity.setStatus(ImportStatus.SUCCESS);
+                historyEntity.setAddedObjectsCount(count);
+            }catch (Exception e){
+                historyEntity.setStatus(ImportStatus.FAILURE);
+            }
+
         } else {
+            historyEntity.setStatus(ImportStatus.FAILURE);
             throw new IllegalArgumentException("Unsupported file format");
         }
+        importHistoryRepository.save(historyEntity);
+
     }
 
 
-
-
-    private void importFromJson(MultipartFile file, Long userId, String token) throws Exception {
+    private int importFromJson(MultipartFile file, Long userId, String token) throws Exception {
 
         List<HumanBeing> humans = objectMapper.readValue(file.getInputStream(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         for (HumanBeing human : humans) {
-            humanBeingService.addHumanModelFromFile(human,userId,token);
+            humanBeingService.addHumanModelFromFile(human, userId, token);
         }
+        return humans.size();
+    }
+
+    @Transactional(readOnly = true)
+    public List<History> getImportHistory(){
+        Set<Role> roles = (Set<Role>) SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        if (roles.contains(Role.ADMIN)){
+            return  importHistoryRepository.findAll().stream().map(History::toModel).collect(Collectors.toList());
+
+        }
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user = userRepo.findByLogin(login);
+        return  importHistoryRepository.findByUser(user).stream().map(History::toModel).collect(Collectors.toList());
+
+
     }
 }
