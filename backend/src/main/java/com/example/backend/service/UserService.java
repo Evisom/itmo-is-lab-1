@@ -9,6 +9,9 @@ import com.example.backend.repository.LimboRepo;
 import com.example.backend.repository.UserRepo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +31,16 @@ public class UserService {
 
     private final LimboService limboService;
 
+    @Bean
+    public UserDetailsService userDetailsService(){
+        return username -> userRepo.findByLogin(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
 
     @Transactional(readOnly = true)
     public Optional<UserEntity> getByLogin(@NonNull String login) {
-        UserEntity user = userRepo.findByLogin(login);
+        UserEntity user = userRepo.findByLogin(login).orElse(null);
         return Optional.ofNullable(user);
 
     }

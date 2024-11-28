@@ -4,7 +4,6 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Mood;
 import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.HumanBeingEntity;
-import com.example.backend.exception.NoEntityException;
 import com.example.backend.service.HumanBeingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +53,9 @@ public class HumanBeingController {
     }
 
     @PostMapping
-    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,  @RequestParam Long userId, @RequestHeader("Authorization") String token){
+    public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,  @RequestParam Long userId){
         try {
-            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId,token.substring(7)));
+            return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId));
         }catch (AccessDeniedException e) {
             return ResponseEntity.status(403).build();
         }catch (Exception e){
@@ -66,16 +65,16 @@ public class HumanBeingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity) {
         try {
-            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity,token.substring(7)));
+            return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
         }catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id, @RequestHeader("Authorization") String token) throws NoEntityException {
-        if (humanBeingService.deleteHumanBeing(id,token.substring(7))) {
+    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id) throws  AccessDeniedException {
+        if (humanBeingService.deleteHumanBeing(id)) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
