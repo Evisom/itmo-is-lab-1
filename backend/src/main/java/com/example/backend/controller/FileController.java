@@ -18,9 +18,9 @@ public class FileController {
 
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam Long userId, @RequestHeader("Authorization") String token,@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam Long userId,@RequestParam("file") MultipartFile file) {
         try {
-            importService.importFile(file, userId,token.substring(7));
+            importService.importFile(file, userId);
             return ResponseEntity.ok("File imported successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

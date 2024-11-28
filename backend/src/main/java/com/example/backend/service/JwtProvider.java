@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -109,8 +108,5 @@ public class JwtProvider {
 
 
 
-    public List<String> extractRoles(String token) {
-        Claims claims = getClaims(token, jwtAccessSecret);
-        return claims.get("roles", List.class);
-    }
+
 }

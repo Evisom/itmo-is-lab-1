@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Mood;
+import com.example.backend.domain.Role;
 import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.Car;
 import com.example.backend.entity.Coordinates;
@@ -18,6 +19,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -34,8 +37,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HumanBeingService {
     private final EntityManager entityManager;
-
-    private final JwtProvider jwtProvider;
 
 
     private final HumanBeingRepo humanBeingRepo;
@@ -147,11 +148,14 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId, String token) throws NoEntityException, AccessDeniedException {
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) throws NoEntityException, AccessDeniedException {
 
+
+        UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
 
-        if (!checkRights(userId, token)) {
+        Set<Role>  roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -185,14 +189,22 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public void addHumanModelFromFile(HumanBeing human, Long userId, String token) throws NoEntityException, AccessDeniedException {
+    public void addHumanModelFromFile(HumanBeing human, Long userId) throws NoEntityException, AccessDeniedException {
 
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+
         HumanBeingEntity humanBeingEntity = new HumanBeingEntity();
 
-        if (!checkRights(userId, token)) {
+
+
+
+        UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        Set<Role>  roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
+
 
         Long carId = human.getCar().getId();
         Car car;
@@ -220,7 +232,6 @@ public class HumanBeingService {
         }
 
 
-
         humanBeingEntity.setCar(car);
         humanBeingEntity.setCoordinates(coordinates);
         humanBeingEntity.setUser(user);
@@ -237,13 +248,18 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails, String token) throws NoEntityException, AccessDeniedException {
+    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
         Coordinates coordinates;
 
 
-        if (!checkRights(humanBeingEntity.getUser().getId(), token)) {
+
+        UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user =humanBeingEntity.getUser();
+
+        Set<Role>  roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -288,7 +304,7 @@ public class HumanBeingService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public boolean deleteHumanBeing(Long id, String token) throws NoEntityException {
+    public boolean deleteHumanBeing(Long id) throws AccessDeniedException {
 
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElse(null);
 
@@ -296,9 +312,17 @@ public class HumanBeingService {
             return false;
         }
 
-        if (!checkRights(humanBeingEntity.getUser().getId(), token)) {
-            return false;
+
+
+        UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user = humanBeingEntity.getUser();
+
+        Set<Role>  roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
+            throw new AccessDeniedException("You do not have permission to edit ");
         }
+
+
 
         humanBeingRepo.deleteById(id);
 
@@ -332,14 +356,6 @@ public class HumanBeingService {
     @Transactional
     public void updateHumansWithoutCars() {
         humanBeingRepo.updateHumansWithoutCars();
-    }
-
-    private boolean checkRights(Long userId, String token) throws NoEntityException {
-        String usernameFromToken = jwtProvider.getAccessClaims(token).getSubject();
-        List<String> roles = jwtProvider.extractRoles(token);
-
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
-        return Objects.equals(user.getLogin(), usernameFromToken) || roles.contains("ADMIN");
     }
 
 

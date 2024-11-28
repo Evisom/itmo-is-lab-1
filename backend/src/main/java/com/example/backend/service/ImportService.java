@@ -30,7 +30,7 @@ public class ImportService {
     private final ImportHistoryRepository importHistoryRepository;
 
     @Transactional
-    public void importFile(MultipartFile file, Long userId, String token) throws Exception {
+    public void importFile(MultipartFile file, Long userId) throws Exception {
         ImportHistoryEntity historyEntity = new ImportHistoryEntity();
         historyEntity.setStatus(ImportStatus.IN_PROGRESS);
         historyEntity.setUser(userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("No such user")));
@@ -41,7 +41,7 @@ public class ImportService {
         assert fileName != null;
         if (fileName.endsWith(".json")) {
             try {
-                int count = importFromJson(file, userId, token);
+                int count = importFromJson(file, userId);
                 historyEntity.setStatus(ImportStatus.SUCCESS);
                 historyEntity.setAddedObjectsCount(count);
             }catch (Exception e){
@@ -57,13 +57,13 @@ public class ImportService {
     }
 
 
-    private int importFromJson(MultipartFile file, Long userId, String token) throws Exception {
+    private int importFromJson(MultipartFile file, Long userId) throws Exception {
 
         List<HumanBeing> humans = objectMapper.readValue(file.getInputStream(),
                 new TypeReference<>() {
                 });
         for (HumanBeing human : humans) {
-            humanBeingService.addHumanModelFromFile(human, userId, token);
+            humanBeingService.addHumanModelFromFile(human, userId);
         }
         return humans.size();
     }
@@ -76,7 +76,7 @@ public class ImportService {
 
         }
         String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity user = userRepo.findByLogin(login);
+        UserEntity user = userRepo.findByLogin(login).orElse(null);
         return  importHistoryRepository.findByUser(user).stream().map(History::toModel).collect(Collectors.toList());
 
 
