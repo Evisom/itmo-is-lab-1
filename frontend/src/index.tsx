@@ -22,8 +22,8 @@ import { Coordinates } from "./routes/Coordinates";
 import { Car } from "./routes/Car";
 import { Import } from "./routes/Import";
 
-export const BASEURL = "/~s369074";
-// export const BASEURL = "";
+// export const BASEURL = "/~s369074";
+export const BASEURL = "";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
