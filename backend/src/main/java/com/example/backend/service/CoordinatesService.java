@@ -35,10 +35,10 @@ public class CoordinatesService {
 
     @Transactional
     public Coordinates updateCoordinates(Long id, Coordinates coordinates) throws NoEntityException {
-        Coordinates oldCoor = coordinatesRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
-        oldCoor.setX(coordinates.getX());
-        oldCoor.setY(coordinates.getY());
-        coordinatesRepo.save(oldCoor);
+        Coordinates oldCoordinates = coordinatesRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
+        oldCoordinates.setX(coordinates.getX());
+        oldCoordinates.setY(coordinates.getY());
+        coordinatesRepo.save(oldCoordinates);
         coordinates.setId(id);
         return coordinates;
 
