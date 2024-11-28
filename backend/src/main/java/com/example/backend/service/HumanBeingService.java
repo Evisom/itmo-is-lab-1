@@ -184,6 +184,57 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
+    @Transactional
+    public void addHumanModelFromFile(HumanBeing human, Long userId, String token) throws NoEntityException, AccessDeniedException {
+
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+        HumanBeingEntity humanBeingEntity = new HumanBeingEntity();
+
+        if (!checkRights(userId, token)) {
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
+
+        Long carId = human.getCar().getId();
+        Car car;
+        if (carId == null) {
+            car = new Car();
+            car.setCool(human.getCar().getCool());
+            carRepo.save(car);
+
+        } else {
+            car = carRepo.findById(carId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        }
+
+
+        Long coorId = human.getCoordinates().getId();
+        Coordinates coordinates;
+        if (coorId == null) {
+            coordinates = new Coordinates();
+            coordinates.setX(human.getCoordinates().getX());
+            coordinates.setY(human.getCoordinates().getY());
+            coordinatesRepo.save(coordinates);
+        } else {
+            coordinates = coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        }
+
+
+
+        humanBeingEntity.setCar(car);
+        humanBeingEntity.setCoordinates(coordinates);
+        humanBeingEntity.setUser(user);
+        humanBeingEntity.setName(human.getName());
+        humanBeingEntity.setMood(human.getMood());
+        humanBeingEntity.setHasToothpick(human.isHasToothpick());
+        humanBeingEntity.setRealHero(human.getRealHero());
+        humanBeingEntity.setCreationDate(human.getCreationDate());
+        humanBeingEntity.setImpactSpeed(human.getImpactSpeed());
+        humanBeingEntity.setMinutesOfWaiting(human.getMinutesOfWaiting());
+        humanBeingEntity.setSoundtrackName(human.getSoundtrackName());
+        humanBeingEntity.setWeaponType(human.getWeaponType());
+        humanBeingRepo.save(humanBeingEntity);
+    }
 
     @Transactional
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails, String token) throws NoEntityException, AccessDeniedException {
