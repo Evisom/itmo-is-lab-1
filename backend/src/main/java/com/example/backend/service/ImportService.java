@@ -12,11 +12,13 @@ import com.example.backend.repository.UserRepo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,7 +72,12 @@ public class ImportService {
 
     @Transactional(readOnly = true)
     public List<History> getImportHistory(){
-        Set<Role> roles = (Set<Role>) SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+        Set<Role> roles = authorities.stream()
+                .map(auth -> Role.valueOf(auth.getAuthority()))
+                .collect(Collectors.toSet());
+
         if (roles.contains(Role.ADMIN)){
             return  importHistoryRepository.findAll().stream().map(History::toModel).collect(Collectors.toList());
 

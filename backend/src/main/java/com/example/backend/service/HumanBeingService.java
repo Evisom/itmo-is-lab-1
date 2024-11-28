@@ -154,8 +154,8 @@ public class HumanBeingService {
         UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
 
-        Set<Role>  roles = userFromToken.getRoles();
-        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
+        Set<Role> roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -195,13 +195,11 @@ public class HumanBeingService {
         HumanBeingEntity humanBeingEntity = new HumanBeingEntity();
 
 
-
-
         UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
 
-        Set<Role>  roles = userFromToken.getRoles();
-        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
+        Set<Role> roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -254,12 +252,11 @@ public class HumanBeingService {
         Coordinates coordinates;
 
 
-
         UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserEntity user =humanBeingEntity.getUser();
+        UserEntity user = humanBeingEntity.getUser();
 
-        Set<Role>  roles = userFromToken.getRoles();
-        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
+        Set<Role> roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
@@ -313,15 +310,13 @@ public class HumanBeingService {
         }
 
 
-
         UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = humanBeingEntity.getUser();
 
-        Set<Role>  roles = userFromToken.getRoles();
-        if (!Objects.equals(userFromToken.getLogin(), user.getLogin())&&!(roles.contains(Role.ADMIN))) {
+        Set<Role> roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
-
 
 
         humanBeingRepo.deleteById(id);

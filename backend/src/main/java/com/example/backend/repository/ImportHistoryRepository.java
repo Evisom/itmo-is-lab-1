@@ -12,5 +12,5 @@ public interface ImportHistoryRepository extends JpaRepository<ImportHistoryEnti
 
     List<ImportHistoryEntity> findByUser(UserEntity user);
 
-    List<ImportHistoryEntity> findAll();
+
 }
