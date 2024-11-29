@@ -16,9 +16,10 @@ import {
   TextField,
   Typography,
   FormControlLabel,
+  Alert,
 } from "@mui/material";
 import { Header } from "../../components/Header";
-import "./Object.scss"; // Renamed to css
+import "./Object.scss";
 
 import { BASEURL } from "../../index";
 
@@ -41,6 +42,8 @@ export const ObjectPage = ({ type }) => {
     useSelector((state: RootState) => state.user.id) ||
       localStorage.getItem("id")
   );
+
+  const [infoalert, setAlert] = useState({});
 
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin"));
   const [editMode, setEditMode] = useState(type !== "view");
@@ -183,6 +186,14 @@ export const ObjectPage = ({ type }) => {
     const url =
       type === "new" ? `/humanbeings?userId=${id}` : `/humanbeings/${objectId}`;
 
+    const {
+      coordinatesOption,
+      coordinatesId,
+      carOption,
+      carId,
+      ...modifiedBodyObject
+    } = bodyObject;
+
     fetch(url, {
       method,
       headers: {
@@ -190,12 +201,30 @@ export const ObjectPage = ({ type }) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(bodyObject),
-    }).then((response) => {
-      if (response.status === 200) {
-        navigate(BASEURL + "/");
-      }
-    });
+      body: JSON.stringify(modifiedBodyObject),
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          navigate(BASEURL + "/");
+        }
+        if (response.status === 409) {
+          setAlert({
+            error: true,
+            text: "Невозможно сохранить объект. Имя должно быть уникальным",
+          });
+        } else {
+          setAlert({
+            error: true,
+            text: "Ошибка при создании объекта",
+          });
+        }
+      })
+      .catch(() => {
+        setAlert({
+          error: true,
+          text: "Ошибка при создании объекта",
+        });
+      });
   };
 
   return (
@@ -446,7 +475,16 @@ export const ObjectPage = ({ type }) => {
               </FormGroup>
             </form>
           </div>
-          <div className="object-visual"></div>
+          <div className="object-visual">
+            {infoalert?.text && (
+              <Alert
+                className="alert"
+                severity={infoalert?.error ? "error" : "success"}
+              >
+                {infoalert?.text}
+              </Alert>
+            )}
+          </div>
         </div>
       </Container>
     </div>
