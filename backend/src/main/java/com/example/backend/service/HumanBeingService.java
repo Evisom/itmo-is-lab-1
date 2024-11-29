@@ -275,7 +275,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(humanBeingDetails.getName()).orElse(null);
 
-        if (humanBeing!=null && !humanBeing.isEmpty()){
+        if (humanBeing!=null && !humanBeing.isEmpty()&& !Objects.equals(humanBeingDetails.getName(), humanBeingEntity.getName())) {
             throw new HumanAlreadyExist("Human alredy exist");
         }
 
