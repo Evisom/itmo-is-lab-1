@@ -87,6 +87,20 @@ export const Import = () => {
     },
   ];
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (alert) {
+      timer = setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [alert]);
+
   const handleUpload = () => {
     let formData = new FormData();
     formData.append("file", file);
@@ -95,21 +109,40 @@ export const Import = () => {
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     })
+      .then((res) => res.text())
       .then((res) => {
         setFile(null);
         setTimeout(() => {
           mutate(`/history`);
         }, 500);
-        if (res.status === 200) {
+
+        if (res === "smth went wrong") {
           setAlert({
-            text: "Файл успешно загружен",
+            text: "Ошибка чтения файла",
+            error: true,
+          });
+        } else if (res === "access denied") {
+          setAlert({
+            text: "Доступ запрещен",
+            error: true,
+          });
+        } else if (res === "Invalid data") {
+          setAlert({
+            text: "Некорректные данные",
+            error: true,
+          });
+        } else if (res === "File imported successfully") {
+          setAlert({
+            text: "Объекты успешно добавлены",
             error: false,
           });
         }
+
+        console.log(res);
       })
       .catch(() => {
         setAlert({
-          text: "Ошибка в файле",
+          text: "Ошибка",
           error: true,
         });
       });
@@ -159,9 +192,20 @@ export const Import = () => {
           </Button>
         </div>
 
-        <div style={{ height: 400, width: "100%", marginTop: 40 }}>
-          <Typography variant="h6">История операций</Typography>
+        <div className="alert-container">
+          {alert?.text && (
+            <Alert
+              className="alert"
+              severity={alert.error ? "error" : "success"}
+            >
+              {alert.text}
+            </Alert>
+          )}
+        </div>
+
+        <div className="history">
           <div style={{ height: "100%" }}>
+            <h3>История операций</h3>
             <DataGrid rows={rows} columns={columns} hideFooter />
           </div>
         </div>
