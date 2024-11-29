@@ -6,6 +6,8 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Role;
 import com.example.backend.entity.ImportHistoryEntity;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.exception.HumanAlreadyExist;
+import com.example.backend.exception.NoEntityException;
 import com.example.backend.exception.UserNotFoundException;
 import com.example.backend.repository.ImportHistoryRepository;
 import com.example.backend.repository.UserRepo;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +51,13 @@ public class ImportService {
                 int count = importFromJson(file, userId);
                 historyEntity.setStatus(ImportStatus.SUCCESS);
                 historyEntity.setAddedObjectsCount(count);
-            }catch (Exception e){
+            } catch (NoEntityException | HumanAlreadyExist e) {
+                throw new IllegalArgumentException("Invalid data");
+            } catch (AccessDeniedException e) {
+                throw new IllegalArgumentException("access denied");
+            } catch (Exception e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
+                throw new IllegalArgumentException("smth went wrong");
             }
 
         } else {
@@ -73,20 +81,20 @@ public class ImportService {
     }
 
     @Transactional(readOnly = true)
-    public List<History> getImportHistory(){
+    public List<History> getImportHistory() {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
         Set<Role> roles = authorities.stream()
                 .map(auth -> Role.valueOf(auth.getAuthority()))
                 .collect(Collectors.toSet());
 
-        if (roles.contains(Role.ADMIN)){
-            return  importHistoryRepository.findAll().stream().map(History::toModel).collect(Collectors.toList());
+        if (roles.contains(Role.ADMIN)) {
+            return importHistoryRepository.findAll().stream().map(History::toModel).collect(Collectors.toList());
 
         }
         UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return  importHistoryRepository.findByUser(user).stream().map(History::toModel).collect(Collectors.toList());
+        return importHistoryRepository.findByUser(user).stream().map(History::toModel).collect(Collectors.toList());
 
 
     }
