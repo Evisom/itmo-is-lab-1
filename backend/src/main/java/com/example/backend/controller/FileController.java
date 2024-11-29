@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 
 
+import com.example.backend.exception.HumanAlreadyExist;
 import com.example.backend.service.ImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ public class FileController {
         try {
             importService.importFile(file, userId);
             return ResponseEntity.ok("File imported successfully");
+        }catch (HumanAlreadyExist e){
+            return ResponseEntity.status(409).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
