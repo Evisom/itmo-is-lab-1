@@ -162,7 +162,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
 
-        if (humanBeing != null){
+        if (humanBeing!=null && !humanBeing.isEmpty()){
             throw new HumanAlreadyExist("Human alredy exist");
         }
 
@@ -213,7 +213,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
 
-        if (humanBeing != null){
+        if (humanBeing!=null && !humanBeing.isEmpty()){
             throw new HumanAlreadyExist("Human already exist");
         }
 
@@ -275,7 +275,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(humanBeingDetails.getName()).orElse(null);
 
-        if (humanBeing != null){
+        if (humanBeing!=null && !humanBeing.isEmpty()){
             throw new HumanAlreadyExist("Human alredy exist");
         }
 

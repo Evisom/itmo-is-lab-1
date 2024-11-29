@@ -4,6 +4,7 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Mood;
 import com.example.backend.domain.WeaponType;
 import com.example.backend.entity.HumanBeingEntity;
+import com.example.backend.exception.HumanAlreadyExist;
 import com.example.backend.service.HumanBeingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,8 @@ public class HumanBeingController {
     public ResponseEntity<HumanBeing> createHumanBeing(@RequestBody HumanBeingEntity human,  @RequestParam Long userId){
         try {
             return ResponseEntity.ok(humanBeingService.createHumanBeing(human, userId));
+        }catch (HumanAlreadyExist e){
+            return ResponseEntity.status(409).build();
         }catch (AccessDeniedException e) {
             return ResponseEntity.status(403).build();
         }catch (Exception e){
@@ -68,6 +71,8 @@ public class HumanBeingController {
     public ResponseEntity<HumanBeing> updateHumanBeing(@PathVariable Long id, @RequestBody HumanBeingEntity humanBeingEntity) {
         try {
             return ResponseEntity.ok(humanBeingService.updateHumanBeing(id, humanBeingEntity));
+        }catch (HumanAlreadyExist e){
+            return ResponseEntity.status(409).build();
         }catch (Exception e){
             return ResponseEntity.notFound().build();
         }
