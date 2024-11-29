@@ -7,8 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface HumanBeingRepo extends JpaRepository<HumanBeingEntity, Long> {
+
+
+    Optional<List<HumanBeingEntity>> findByName(String name);
 
     @Query(value = "SELECT count_human_beings_by_soundtrack(:soundtrackName)", nativeQuery = true)
     int getHumanCountBySoundtrackName(@Param("soundtrackName") String soundtrackName);

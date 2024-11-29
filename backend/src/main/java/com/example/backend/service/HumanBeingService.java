@@ -8,6 +8,7 @@ import com.example.backend.entity.Car;
 import com.example.backend.entity.Coordinates;
 import com.example.backend.entity.HumanBeingEntity;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.exception.HumanAlreadyExist;
 import com.example.backend.exception.NoEntityException;
 import com.example.backend.repository.CarRepo;
 import com.example.backend.repository.CoordinatesRepo;
@@ -148,7 +149,7 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) throws NoEntityException, AccessDeniedException {
+    public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
 
 
         UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -158,6 +159,13 @@ public class HumanBeingService {
         if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
+
+        List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
+
+        if (humanBeing != null){
+            throw new HumanAlreadyExist("Human alredy exist");
+        }
+
 
         Long carId = human.getCar().getId();
         Car car;
@@ -189,7 +197,7 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public void addHumanModelFromFile(HumanBeing human, Long userId) throws NoEntityException, AccessDeniedException {
+    public void addHumanModelFromFile(HumanBeing human, Long userId) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
 
 
         HumanBeingEntity humanBeingEntity = new HumanBeingEntity();
@@ -203,6 +211,11 @@ public class HumanBeingService {
             throw new AccessDeniedException("You do not have permission to edit ");
         }
 
+        List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
+
+        if (humanBeing != null){
+            throw new HumanAlreadyExist("Human already exist");
+        }
 
         Long carId = human.getCar().getId();
         Car car;
@@ -246,7 +259,7 @@ public class HumanBeingService {
     }
 
     @Transactional
-    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException {
+    public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
         Coordinates coordinates;
@@ -258,6 +271,12 @@ public class HumanBeingService {
         Set<Role> roles = userFromToken.getRoles();
         if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
             throw new AccessDeniedException("You do not have permission to edit ");
+        }
+
+        List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(humanBeingDetails.getName()).orElse(null);
+
+        if (humanBeing != null){
+            throw new HumanAlreadyExist("Human alredy exist");
         }
 
 
