@@ -42,8 +42,8 @@ public class ImportService {
             throw new IllegalArgumentException("File is empty");
         }
         String fileName = file.getOriginalFilename();
-        assert fileName != null;
-        if (fileName.endsWith(".json")) {
+
+        if (fileName != null && fileName.endsWith(".json")) {
             try {
                 int count = importFromJson(file, userId);
                 historyEntity.setStatus(ImportStatus.SUCCESS);
