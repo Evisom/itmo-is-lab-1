@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +35,7 @@ public class ImportService {
     private final ObjectMapper objectMapper;
     private final ImportHistoryRepository importHistoryRepository;
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void importFile(MultipartFile file, Long userId) throws Exception {
         ImportHistoryEntity historyEntity = new ImportHistoryEntity();
         historyEntity.setStatus(ImportStatus.IN_PROGRESS);

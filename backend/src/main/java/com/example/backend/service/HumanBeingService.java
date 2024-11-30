@@ -148,7 +148,7 @@ public class HumanBeingService {
 
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public HumanBeing createHumanBeing(HumanBeingEntity human, Long userId) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
 
 
@@ -196,7 +196,7 @@ public class HumanBeingService {
         return HumanBeing.toModel(humanBeingRepo.save(human));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void addHumanModelFromFile(HumanBeing human, Long userId) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
 
 
@@ -258,7 +258,7 @@ public class HumanBeingService {
         humanBeingRepo.save(humanBeingEntity);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
         Car car;
