@@ -18,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,15 +56,15 @@ public class ImportService {
             } catch (NoEntityException | HumanAlreadyExist e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
                 importHistoryRepository.save(historyEntity);
-                throw new IllegalArgumentException("Invalid data");
+//                throw new IllegalArgumentException("Invalid data");
             } catch (AccessDeniedException e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
                 importHistoryRepository.save(historyEntity);
-                throw new IllegalArgumentException("access denied");
+//                throw new IllegalArgumentException("access denied");
             } catch (Exception e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
                 importHistoryRepository.save(historyEntity);
-                throw new IllegalArgumentException("smth went wrong");
+//                throw new IllegalArgumentException("smth went wrong");
             }
 
         } else {
