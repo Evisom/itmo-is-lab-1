@@ -23,8 +23,6 @@ public class FileController {
         try {
             importService.importFile(file, userId);
             return ResponseEntity.ok("File imported successfully");
-        }catch (HumanAlreadyExist e){
-            return ResponseEntity.status(409).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

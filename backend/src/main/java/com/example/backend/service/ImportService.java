@@ -40,41 +40,30 @@ public class ImportService {
     public void importFile(MultipartFile file, Long userId) throws Exception {
         ImportHistoryEntity historyEntity = new ImportHistoryEntity();
         historyEntity.setStatus(ImportStatus.IN_PROGRESS);
+        try {
+            historyEntity.setUser(userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("No such user")));
+            historyEntity.setLogin();
 
-        historyEntity.setUser(userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("No such user")));
-        historyEntity.setLogin();
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
-        }
-        String fileName = file.getOriginalFilename();
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File is empty");
+            }
 
-        if (fileName != null && fileName.endsWith(".json")) {
-            try {
+            String fileName = file.getOriginalFilename();
+            if (fileName != null && fileName.endsWith(".json")) {
                 int count = importFromJson(file, userId);
                 historyEntity.setStatus(ImportStatus.SUCCESS);
                 historyEntity.setAddedObjectsCount(count);
-            } catch (NoEntityException | HumanAlreadyExist e) {
-                historyEntity.setStatus(ImportStatus.FAILURE);
-                importHistoryRepository.save(historyEntity);
-//                throw new IllegalArgumentException("Invalid data");
-            } catch (AccessDeniedException e) {
-                historyEntity.setStatus(ImportStatus.FAILURE);
-                importHistoryRepository.save(historyEntity);
-//                throw new IllegalArgumentException("access denied");
-            } catch (Exception e) {
-                historyEntity.setStatus(ImportStatus.FAILURE);
-                importHistoryRepository.save(historyEntity);
-//                throw new IllegalArgumentException("smth went wrong");
+            } else {
+                throw new IllegalArgumentException("Unsupported file format");
             }
-
-        } else {
+        } catch (Exception e) {
             historyEntity.setStatus(ImportStatus.FAILURE);
+            throw e;
+        } finally {
             importHistoryRepository.save(historyEntity);
-            throw new IllegalArgumentException("Unsupported file format");
         }
-        importHistoryRepository.save(historyEntity);
-
     }
+
 
 
     private int importFromJson(MultipartFile file, Long userId) throws Exception {

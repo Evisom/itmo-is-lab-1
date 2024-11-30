@@ -258,6 +258,8 @@ public class HumanBeingService {
         humanBeingRepo.save(humanBeingEntity);
     }
 
+
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
