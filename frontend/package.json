@@ -55,6 +55,5 @@
   "devDependencies": {
     "sass": "^1.79.4"
   },
-  "proxy": "http://backend:8080",
-  "homepage": "/~s369074"
+  "proxy": "http://localhost:3001"
 }
