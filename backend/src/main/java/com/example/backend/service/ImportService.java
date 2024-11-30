@@ -53,16 +53,22 @@ public class ImportService {
                 historyEntity.setStatus(ImportStatus.SUCCESS);
                 historyEntity.setAddedObjectsCount(count);
             } catch (NoEntityException | HumanAlreadyExist e) {
+                historyEntity.setStatus(ImportStatus.FAILURE);
+                importHistoryRepository.save(historyEntity);
                 throw new IllegalArgumentException("Invalid data");
             } catch (AccessDeniedException e) {
+                historyEntity.setStatus(ImportStatus.FAILURE);
+                importHistoryRepository.save(historyEntity);
                 throw new IllegalArgumentException("access denied");
             } catch (Exception e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
+                importHistoryRepository.save(historyEntity);
                 throw new IllegalArgumentException("smth went wrong");
             }
 
         } else {
             historyEntity.setStatus(ImportStatus.FAILURE);
+            importHistoryRepository.save(historyEntity);
             throw new IllegalArgumentException("Unsupported file format");
         }
         importHistoryRepository.save(historyEntity);
