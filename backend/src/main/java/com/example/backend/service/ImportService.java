@@ -6,8 +6,6 @@ import com.example.backend.domain.HumanBeing;
 import com.example.backend.domain.Role;
 import com.example.backend.entity.ImportHistoryEntity;
 import com.example.backend.entity.UserEntity;
-import com.example.backend.exception.HumanAlreadyExist;
-import com.example.backend.exception.NoEntityException;
 import com.example.backend.exception.UserNotFoundException;
 import com.example.backend.repository.ImportHistoryRepository;
 import com.example.backend.repository.UserRepo;
@@ -18,11 +16,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.AccessDeniedException;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
