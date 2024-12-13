@@ -43,6 +43,9 @@ public class MinioController {
                 mediaType = MediaType.IMAGE_PNG;
             } else if (filename.endsWith(".pdf")) {
                 mediaType = MediaType.APPLICATION_PDF;
+            } else if (filename.endsWith(".json")) {
+                mediaType = MediaType.APPLICATION_JSON;
+
             }
 
             HttpHeaders headers = new HttpHeaders();

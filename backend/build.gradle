@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
-
+    implementation 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
@@ -54,6 +54,13 @@ dependencies {
 
     implementation group: 'io.minio', name: 'minio', version: '8.5.14'
     testImplementation group: 'software.amazon.awssdk', name: 's3', version: '2.29.32'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.testcontainers:testcontainers:1.19.0'
+    testImplementation 'org.testcontainers:postgresql:1.19.0'
+
+
 
 
 
