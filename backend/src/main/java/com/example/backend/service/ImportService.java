@@ -60,7 +60,9 @@ public class ImportService {
                 historyEntity.setStatus(ImportStatus.SUCCESS);
 
             }catch (MinioLostException e){
+                historyEntity.setStatus(ImportStatus.FAILURE);
                 throw e;
+
 
             } catch (Exception e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
