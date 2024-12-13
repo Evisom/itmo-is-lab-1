@@ -29,6 +29,6 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(MinioLostException.class)
     public ResponseEntity<String> handleRuntimeException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("pizdec");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("pizdec");
     }
 }
