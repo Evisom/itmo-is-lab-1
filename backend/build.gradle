@@ -52,6 +52,11 @@ dependencies {
     implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.2'
     compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0'
 
+    implementation group: 'io.minio', name: 'minio', version: '8.5.14'
+    testImplementation group: 'software.amazon.awssdk', name: 's3', version: '2.29.32'
+
+
+
 
 
 
