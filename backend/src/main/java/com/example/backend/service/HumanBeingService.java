@@ -237,7 +237,7 @@ public class HumanBeingService {
                 coordinatesRepo.save(coordinates);
             } else {
                 coordinates = coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity"));
-
+            }
                 humanBeingEntity.setCar(car);
                 humanBeingEntity.setCoordinates(coordinates);
                 humanBeingEntity.setUser(user);
@@ -252,7 +252,7 @@ public class HumanBeingService {
                 humanBeingEntity.setWeaponType(human.getWeaponType());
 
                 humanBeingEntitys.add(humanBeingEntity);
-            }
+
 
 
         }
