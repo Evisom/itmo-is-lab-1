@@ -91,9 +91,11 @@ public class MinioService {
         List<HumanBeing> humans = objectMapper.readValue(file.getInputStream(),
                 new TypeReference<>() {
                 });
-        for (HumanBeing human : humans) {
-            humanBeingService.addHumanModelFromFile(human, userId);
-        }
+//        for (HumanBeing human : humans) {
+//            humanBeingService.addHumanModelFromFile(human, userId);
+//        }
+
+        humanBeingService.addAllHumanModelFromFile(humans, userId);
         return humans.size();
     }
 }

@@ -36,7 +36,7 @@ public class ImportService {
 
 
     @Transactional(isolation = Isolation.REPEATABLE_READ, noRollbackFor = MinioLostException.class)
-    public void addToHistory(MultipartFile file, Long userId) throws MinioLostException {
+    public void addToHistory(MultipartFile file, Long userId)  {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
