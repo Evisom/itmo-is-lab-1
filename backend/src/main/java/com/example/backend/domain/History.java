@@ -19,6 +19,7 @@ public class History {
     private ImportStatus status;
     private Integer addedObjectsCount;
     private String login;
+    private String filename;
 
 
     public static History toModel(ImportHistoryEntity historyEntity){
@@ -28,6 +29,7 @@ public class History {
         model.setLogin(historyEntity.getLogin());
         model.setStatus(historyEntity.getStatus());
         model.setAddedObjectsCount(historyEntity.getAddedObjectsCount());
+        model.setFilename(historyEntity.getFilename());
         return model;
     }
 }
