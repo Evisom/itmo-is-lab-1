@@ -18,6 +18,7 @@ import useSWR, { mutate } from "swr";
 import { BASEURL } from "../..";
 import { MuiFileInput } from "mui-file-input";
 import "./Import.scss";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const fetcher = (url: string, token: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) =>
@@ -59,6 +60,7 @@ export const Import = () => {
       username: entry.login,
       status: entry.status,
       addedObjectsCount: entry.addedObjectsCount,
+      filename: entry.filename,
     }))
     .reverse();
 
@@ -81,9 +83,55 @@ export const Import = () => {
     {
       field: "addedObjectsCount",
       headerName: "Added Objects",
-      flex: 1,
+      flex: 2,
 
       renderCell: (params) => params.row.addedObjectsCount ?? "N/A",
+    },
+    {
+      field: "download",
+      headerName: "Download",
+      flex: 2,
+
+      renderCell: (params) => {
+        return (
+          params.row.id &&
+          params.row.filename && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "start",
+                height: "100%",
+              }}
+              onClick={() => {
+                fetch(
+                  BASEURL +
+                    "/minio/download/" +
+                    params.row.filename +
+                    "?id=" +
+                    params.row.id,
+                  {
+                    method: "GET",
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                )
+                  .then((res) => res.blob())
+                  .then((blob) => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = url;
+                    a.download = params.row.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                  });
+              }}
+            >
+              <DownloadIcon />
+            </div>
+          )
+        );
+      },
     },
   ];
 
@@ -116,29 +164,33 @@ export const Import = () => {
           mutate(`/history`);
         }, 500);
 
-        if (res === "smth went wrong") {
-          setAlert({
-            text: "Ошибка чтения файла",
-            error: true,
-          });
-        } else if (res === "access denied") {
-          setAlert({
-            text: "Доступ запрещен",
-            error: true,
-          });
-        } else if (res === "Invalid data") {
-          setAlert({
-            text: "Некорректные данные",
-            error: true,
-          });
-        } else if (res === "File imported successfully") {
+        // if (res === "smth went wrong") {
+        //   setAlert({
+        //     text: "Ошибка чтения файла",
+        //     error: true,
+        //   });
+        // } else if (res === "access denied") {
+        //   setAlert({
+        //     text: "Доступ запрещен",
+        //     error: true,
+        //   });
+        // } else if (res === "Invalid data") {
+        //   setAlert({
+        //     text: "Некорректные данные",
+        //     error: true,
+        //   });
+        // } else
+        if (res === "File imported successfully") {
           setAlert({
             text: "Объекты успешно добавлены",
             error: false,
           });
+        } else {
+          setAlert({
+            text: "Ошибка",
+            error: true,
+          });
         }
-
-        console.log(res);
       })
       .catch(() => {
         setAlert({
