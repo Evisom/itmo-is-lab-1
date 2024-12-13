@@ -2,6 +2,7 @@ package com.example.backend.minio;
 
 import com.example.backend.domain.HumanBeing;
 import com.example.backend.exception.MinioLostException;
+import com.example.backend.repository.ImportHistoryRepository;
 import com.example.backend.service.HumanBeingService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,7 @@ public class MinioService {
     private final MinioProperties minioProperties;
     private final ObjectMapper objectMapper;
     private final HumanBeingService humanBeingService;
+    private final ImportHistoryRepository importHistoryRepository;
 
     @Transactional
     public void uploadFile(String bucketName, String objectName, InputStream inputStream, String contentType) {
@@ -71,7 +73,8 @@ public class MinioService {
 
         int count = importFromJson(file, userId);
 
-        String objectName = file.getOriginalFilename();
+        String objectName = importHistoryRepository.findMaxId() +".json";
+
         InputStream inputStream = file.getInputStream();
         String contentType = file.getContentType();
         try {

@@ -238,21 +238,20 @@ public class HumanBeingService {
             } else {
                 coordinates = coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity"));
             }
-                humanBeingEntity.setCar(car);
-                humanBeingEntity.setCoordinates(coordinates);
-                humanBeingEntity.setUser(user);
-                humanBeingEntity.setName(human.getName());
-                humanBeingEntity.setMood(human.getMood());
-                humanBeingEntity.setHasToothpick(human.isHasToothpick());
-                humanBeingEntity.setRealHero(human.getRealHero());
-                humanBeingEntity.setCreationDate(human.getCreationDate());
-                humanBeingEntity.setImpactSpeed(human.getImpactSpeed());
-                humanBeingEntity.setMinutesOfWaiting(human.getMinutesOfWaiting());
-                humanBeingEntity.setSoundtrackName(human.getSoundtrackName());
-                humanBeingEntity.setWeaponType(human.getWeaponType());
+            humanBeingEntity.setCar(car);
+            humanBeingEntity.setCoordinates(coordinates);
+            humanBeingEntity.setUser(user);
+            humanBeingEntity.setName(human.getName());
+            humanBeingEntity.setMood(human.getMood());
+            humanBeingEntity.setHasToothpick(human.isHasToothpick());
+            humanBeingEntity.setRealHero(human.getRealHero());
+            humanBeingEntity.setCreationDate(human.getCreationDate());
+            humanBeingEntity.setImpactSpeed(human.getImpactSpeed());
+            humanBeingEntity.setMinutesOfWaiting(human.getMinutesOfWaiting());
+            humanBeingEntity.setSoundtrackName(human.getSoundtrackName());
+            humanBeingEntity.setWeaponType(human.getWeaponType());
 
-                humanBeingEntitys.add(humanBeingEntity);
-
+            humanBeingEntitys.add(humanBeingEntity);
 
 
         }
