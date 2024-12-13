@@ -25,10 +25,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An unexpected error occurred");
     }
     @ExceptionHandler(MinioLostException.class)
     public ResponseEntity<String> handleRuntimeException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("pizdec");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("pizdec");
     }
 }

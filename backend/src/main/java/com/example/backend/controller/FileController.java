@@ -19,7 +19,7 @@ public class FileController {
 
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam Long userId,@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam Long userId,@RequestParam("file") MultipartFile file) throws Exception {
 
             importService.addToHistory(file, userId);
             return ResponseEntity.ok("File imported successfully");

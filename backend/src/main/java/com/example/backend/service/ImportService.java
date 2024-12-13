@@ -36,7 +36,7 @@ public class ImportService {
 
 
     @Transactional(isolation = Isolation.REPEATABLE_READ, noRollbackFor = MinioLostException.class)
-    public void addToHistory(MultipartFile file, Long userId)  {
+    public void addToHistory(MultipartFile file, Long userId) throws Exception {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
@@ -59,10 +59,12 @@ public class ImportService {
                 count = minioService.importFile(file, userId);
                 historyEntity.setStatus(ImportStatus.SUCCESS);
 
+            }catch (MinioLostException e){
+                throw e;
 
             } catch (Exception e) {
                 historyEntity.setStatus(ImportStatus.FAILURE);
-                throw new MinioLostException("minio lost");
+                throw e;
 
             }finally {
                 historyEntity.setAddedObjectsCount(count);
