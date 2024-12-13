@@ -162,7 +162,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
 
-        if (humanBeing!=null && !humanBeing.isEmpty()){
+        if (humanBeing != null && !humanBeing.isEmpty()) {
             throw new HumanAlreadyExist("Human alredy exist");
         }
 
@@ -197,6 +197,70 @@ public class HumanBeingService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void addAllHumanModelFromFile(List<HumanBeing> humans, Long userId) throws AccessDeniedException, HumanAlreadyExist, NoEntityException {
+        List<HumanBeingEntity> humanBeingEntitys = new ArrayList<>();
+
+
+        UserEntity userFromToken = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+        Set<Role> roles = userFromToken.getRoles();
+        if (!Objects.equals(userFromToken.getLogin(), user.getLogin()) && !(roles.contains(Role.ADMIN))) {
+            throw new AccessDeniedException("You do not have permission to edit ");
+        }
+        for (HumanBeing human : humans) {
+
+            HumanBeingEntity humanBeingEntity = new HumanBeingEntity();
+
+            List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
+            if (humanBeing != null && !humanBeing.isEmpty()) {
+                throw new HumanAlreadyExist("Human already exist");
+            }
+
+            Long carId = human.getCar().getId();
+            Car car;
+            if (carId == null) {
+                car = new Car();
+                car.setCool(human.getCar().getCool());
+                carRepo.save(car);
+
+            } else {
+                car = carRepo.findById(carId).orElseThrow(() -> new NoEntityException("no such entity"));
+
+            }
+            Long coorId = human.getCoordinates().getId();
+            Coordinates coordinates;
+            if (coorId == null) {
+                coordinates = new Coordinates();
+                coordinates.setX(human.getCoordinates().getX());
+                coordinates.setY(human.getCoordinates().getY());
+                coordinatesRepo.save(coordinates);
+            } else {
+                coordinates = coordinatesRepo.findById(coorId).orElseThrow(() -> new NoEntityException("no such entity"));
+            }
+            humanBeingEntity.setCar(car);
+            humanBeingEntity.setCoordinates(coordinates);
+            humanBeingEntity.setUser(user);
+            humanBeingEntity.setName(human.getName());
+            humanBeingEntity.setMood(human.getMood());
+            humanBeingEntity.setHasToothpick(human.isHasToothpick());
+            humanBeingEntity.setRealHero(human.getRealHero());
+            humanBeingEntity.setCreationDate(human.getCreationDate());
+            humanBeingEntity.setImpactSpeed(human.getImpactSpeed());
+            humanBeingEntity.setMinutesOfWaiting(human.getMinutesOfWaiting());
+            humanBeingEntity.setSoundtrackName(human.getSoundtrackName());
+            humanBeingEntity.setWeaponType(human.getWeaponType());
+
+            humanBeingEntitys.add(humanBeingEntity);
+
+
+        }
+
+
+        humanBeingRepo.saveAll(humanBeingEntitys);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void addHumanModelFromFile(HumanBeing human, Long userId) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
 
 
@@ -213,7 +277,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(human.getName()).orElse(null);
 
-        if (humanBeing!=null && !humanBeing.isEmpty()){
+        if (humanBeing != null && !humanBeing.isEmpty()) {
             throw new HumanAlreadyExist("Human already exist");
         }
 
@@ -259,9 +323,6 @@ public class HumanBeingService {
     }
 
 
-
-
-
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public HumanBeing updateHumanBeing(Long id, HumanBeingEntity humanBeingDetails) throws NoEntityException, AccessDeniedException, HumanAlreadyExist {
         HumanBeingEntity humanBeingEntity = humanBeingRepo.findById(id).orElseThrow(() -> new NoEntityException("no such entity"));
@@ -279,7 +340,7 @@ public class HumanBeingService {
 
         List<HumanBeingEntity> humanBeing = humanBeingRepo.findByName(humanBeingDetails.getName()).orElse(null);
 
-        if (humanBeing!=null && !humanBeing.isEmpty()&& !Objects.equals(humanBeingDetails.getName(), humanBeingEntity.getName())) {
+        if (humanBeing != null && !humanBeing.isEmpty() && !Objects.equals(humanBeingDetails.getName(), humanBeingEntity.getName())) {
             throw new HumanAlreadyExist("Human alredy exist");
         }
 

@@ -25,6 +25,8 @@ public class ImportHistoryEntity {
 
     private Integer addedObjectsCount;
 
+    private String filename;
+
     public void setLogin(){
         this.login = this.user.getLogin();
     }
