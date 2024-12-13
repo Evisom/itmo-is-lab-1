@@ -73,7 +73,7 @@ public class MinioService {
 
         int count = importFromJson(file, userId);
 
-        String objectName = importHistoryRepository.findMaxId() +".json";
+        String objectName = (importHistoryRepository.findMaxId()+1) +".json";
 
         InputStream inputStream = file.getInputStream();
         String contentType = file.getContentType();
