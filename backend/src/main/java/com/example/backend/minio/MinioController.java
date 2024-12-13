@@ -32,26 +32,14 @@ public class MinioController {
     }
 
     @GetMapping("/download/{filename}")
-    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String filename,@RequestParam String id) {
+    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String filename, @RequestParam String id) {
         try {
-            InputStream fileStream = minioService.downloadFile(minioProperties.getBucketName(), id+".json");
-            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            InputStream fileStream = minioService.downloadFile(minioProperties.getBucketName(), id + ".json");
 
-            if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                mediaType = MediaType.IMAGE_JPEG;
-            } else if (filename.endsWith(".png")) {
-                mediaType = MediaType.IMAGE_PNG;
-            } else if (filename.endsWith(".pdf")) {
-                mediaType = MediaType.APPLICATION_PDF;
-            } else if (filename.endsWith(".json")) {
-                mediaType = MediaType.APPLICATION_JSON;
-
-            }
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(mediaType);
-            headers.setContentDispositionFormData("attachment",filename );
-
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentDispositionFormData("attachment", filename);
 
 
             return ResponseEntity.ok()
