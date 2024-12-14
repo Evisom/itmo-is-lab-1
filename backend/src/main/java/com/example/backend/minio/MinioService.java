@@ -66,6 +66,8 @@ public class MinioService {
         }
     }
 
+
+    private static final int BBB = 1;
     @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW,rollbackFor = MinioLostException.class)
     public int importFile(MultipartFile file, Long userId) throws Exception {
 
@@ -79,6 +81,9 @@ public class MinioService {
         String contentType = file.getContentType();
         try {
             uploadFile(minioProperties.getBucketName(), objectName, inputStream, contentType);
+            if (BBB > 1) {
+                throw new RuntimeException("");
+            }
         }catch (RuntimeException e){
             throw new MinioLostException("minio lost");
         }
