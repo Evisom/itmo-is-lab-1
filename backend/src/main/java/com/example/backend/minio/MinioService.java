@@ -7,14 +7,23 @@ import com.example.backend.service.HumanBeingService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.*;
+import io.minio.errors.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 
@@ -68,33 +77,50 @@ public class MinioService {
 
 
     private static final int BBB = 1;
+    private final PlatformTransactionManager transactionManager;
 
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW, rollbackFor = MinioLostException.class)
-    public int importFile(MultipartFile file, Long userId) throws Exception {
+//    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW, rollbackFor = MinioLostException.class)
+public int importFile(MultipartFile file, Long userId) throws Exception {
+    int count;
+    String objectName = null;
 
 
-        int count = importFromJson(file, userId);
+    TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        String objectName = (importHistoryRepository.findMaxId() + 1) + ".json";
+    try {
+
+        count = importFromJson(file, userId);
+
+        objectName = (importHistoryRepository.findMaxId() + 1) + ".json";
+        String bucketName = minioProperties.getBucketName();
 
         InputStream inputStream = file.getInputStream();
         String contentType = file.getContentType();
-        try {
-            uploadFile(minioProperties.getBucketName(), objectName, inputStream, contentType);
-            if (BBB >= 1) {
 
 
-                throw new RuntimeException("");
-            }
-        } catch (RuntimeException e) {
+        uploadFile(bucketName, objectName, inputStream, contentType);
+
+
+//        if (BBB >= 1) {
+//            throw new RuntimeException("Test exception for rollback");
+//        }
+
+
+        transactionManager.commit(status);
+
+    } catch (RuntimeException e) {
+
+        transactionManager.rollback(status);
+
+        if (objectName != null) {
             deleteFile(minioProperties.getBucketName(), objectName);
-            throw new MinioLostException("minio lost");
         }
 
-
-        return count;
-
+        throw new MinioLostException("minio lost");
     }
+
+    return count;
+}
 
 
     private int importFromJson(MultipartFile file, Long userId) throws Exception {
@@ -110,15 +136,13 @@ public class MinioService {
         return humans.size();
     }
 
-    private void deleteFile(String bucketName, String objectName) {
-        try {
+    public void deleteFile(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .build());
-            System.out.println("File deleted from MinIO: " + objectName);
-        } catch (Exception e) {
-            System.err.println("Failed to delete file from MinIO: " + objectName);
-        }
+
+
     }
 }
