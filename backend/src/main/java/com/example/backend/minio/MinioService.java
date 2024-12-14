@@ -1,5 +1,6 @@
 package com.example.backend.minio;
 
+import com.atomikos.icatch.jta.UserTransactionImp;
 import com.example.backend.domain.HumanBeing;
 import com.example.backend.exception.MinioLostException;
 import com.example.backend.repository.ImportHistoryRepository;
@@ -7,7 +8,9 @@ import com.example.backend.service.HumanBeingService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.*;
+import jakarta.transaction.UserTransaction;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +29,9 @@ public class MinioService {
     private final ObjectMapper objectMapper;
     private final HumanBeingService humanBeingService;
     private final ImportHistoryRepository importHistoryRepository;
+
+
+    private final UserTransactionImp userTransaction;
 
     @Transactional
     public void uploadFile(String bucketName, String objectName, InputStream inputStream, String contentType) {
@@ -66,12 +72,13 @@ public class MinioService {
         }
     }
 
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW,rollbackFor = MinioLostException.class)
+
+    private static final int BBB = 1;
     public int importFile(MultipartFile file, Long userId) throws Exception {
 
+        userTransaction.begin();
+            int count = importFromJson(file, userId);
 
-
-        int count = importFromJson(file, userId);
 
         String objectName = (importHistoryRepository.findMaxId()+1) +".json";
 
@@ -79,7 +86,12 @@ public class MinioService {
         String contentType = file.getContentType();
         try {
             uploadFile(minioProperties.getBucketName(), objectName, inputStream, contentType);
+            if (BBB > 1) {
+                throw new RuntimeException("");
+            }
+            userTransaction.commit();
         }catch (RuntimeException e){
+            userTransaction.rollback();
             throw new MinioLostException("minio lost");
         }
 
