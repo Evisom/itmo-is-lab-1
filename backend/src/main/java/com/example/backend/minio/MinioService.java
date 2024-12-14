@@ -83,10 +83,11 @@ public class MinioService {
             uploadFile(minioProperties.getBucketName(), objectName, inputStream, contentType);
             if (BBB >= 1) {
 
-                deleteFile(minioProperties.getBucketName(), objectName);
+
                 throw new RuntimeException("");
             }
         } catch (RuntimeException e) {
+            deleteFile(minioProperties.getBucketName(), objectName);
             throw new MinioLostException("minio lost");
         }
 
