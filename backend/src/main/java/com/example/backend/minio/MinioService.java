@@ -68,23 +68,25 @@ public class MinioService {
 
 
     private static final int BBB = 1;
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW,rollbackFor = MinioLostException.class)
-    public int importFile(MultipartFile file, Long userId) throws Exception {
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW, rollbackFor = MinioLostException.class)
+    public int importFile(MultipartFile file, Long userId) throws Exception {
 
 
         int count = importFromJson(file, userId);
 
-        String objectName = (importHistoryRepository.findMaxId()+1) +".json";
+        String objectName = (importHistoryRepository.findMaxId() + 1) + ".json";
 
         InputStream inputStream = file.getInputStream();
         String contentType = file.getContentType();
         try {
             uploadFile(minioProperties.getBucketName(), objectName, inputStream, contentType);
-            if (BBB > 1) {
+            if (BBB >= 1) {
+
+                deleteFile(minioProperties.getBucketName(), objectName);
                 throw new RuntimeException("");
             }
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new MinioLostException("minio lost");
         }
 
@@ -105,5 +107,17 @@ public class MinioService {
 
         humanBeingService.addAllHumanModelFromFile(humans, userId);
         return humans.size();
+    }
+
+    private void deleteFile(String bucketName, String objectName) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build());
+            System.out.println("File deleted from MinIO: " + objectName);
+        } catch (Exception e) {
+            System.err.println("Failed to delete file from MinIO: " + objectName);
+        }
     }
 }
